@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH -J install_env
-#SBATCH -p cpu                # CPU-only partition (no GPU)
+#SBATCH --partition=rome
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=16G
