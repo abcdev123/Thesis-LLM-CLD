@@ -1,0 +1,20 @@
+#!/bin/bash
+#SBATCH -J install_env
+#SBATCH -p cpu                # CPU-only partition (no GPU)
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=16G
+#SBATCH --time=00:30:00
+#SBATCH -o jobs/logs/install_env_%j.log
+
+mkdir -p jobs/logs
+
+# load your Conda module if needed, e.g.:
+# module load anaconda
+
+# initialize conda (adjust path if your install is elsewhere)
+source "$HOME/miniconda3/etc/profile.d/conda.sh"
+
+# create the env in your project dir
+conda env create -f env.yml --prefix ./thesis_env
+
