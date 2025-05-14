@@ -22,4 +22,5 @@ echo "===== System-level GPU info (nvidia-smi) ====="
 nvidia-smi
 
 echo "===== PyTorch-level GPU availability ====="
-python -c "import torch; print('GPU available?', torch.cuda.is_available())"
+# python -c "import torch; print('GPU available?', torch.cuda.is_available())"
+./thesis_env/bin/python -c "import torch; print('GPU available?', torch.cuda.is_available())"
