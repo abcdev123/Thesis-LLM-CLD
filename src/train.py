@@ -126,7 +126,7 @@ def main():
         per_device_train_batch_size=4,
         per_device_eval_batch_size=4,
         num_train_epochs=3,
-        eval_strategy="steps",
+        evaluation_strategy="steps",
         eval_steps=200,
         save_steps=200,
         logging_steps=50,
