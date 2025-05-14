@@ -14,7 +14,7 @@ from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 
 # MODEL_ID   = "cerebras/Cerebras-GPT-111M"
 MODEL_ID   = "mistralai/Mistral-7B-Instruct-v0.2"
-DATA_PATH  = "Dataset_Gijs_prompts.xlsx"
+DATA_PATH  = "src/Dataset_Gijs_prompts.xlsx"
 SEQ_LEN    = 1024   # max sequence length
 EOS_ID     = None   # to be set after tokenizer initialization
 PAD_ID     = None   # to be set after tokenizer initialization
