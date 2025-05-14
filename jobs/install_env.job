@@ -7,13 +7,8 @@
 #SBATCH --time=00:30:00
 #SBATCH -o jobs/logs/install_env_%j.log
 
-mkdir -p jobs/logs
-
-# load your Conda module if needed, e.g.:
-# module load anaconda
-
-# initialize conda (adjust path if your install is elsewhere)
-source "$HOME/miniconda3/etc/profile.d/conda.sh"
+module purge
+module load Anaconda3/2023.07-2
 
 # create the env in your project dir
 conda env create -f env.yml --prefix ./thesis_env
