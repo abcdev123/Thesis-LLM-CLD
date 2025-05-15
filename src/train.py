@@ -13,13 +13,14 @@ from transformers import (
 from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 
 # MODEL_ID   = "cerebras/Cerebras-GPT-111M"
-MODEL_ID   = "mistralai/Mistral-7B-Instruct-v0.2"
+# MODEL_ID   = "mistralai/Mistral-7B-Instruct-v0.2"
+MODEL_ID     = "Qwen/Qwen2.5-72B-Instruct"
 DATA_PATH  = "src/Dataset_Gijs_prompts.xlsx"
 SEQ_LEN    = 1024   # max sequence length
 EOS_ID     = None   # to be set after tokenizer initialization
 PAD_ID     = None   # to be set after tokenizer initialization
 # OUTPUT_DIR = "cerebras_gpt_111m_lora_finetuned"
-OUTPUT_DIR = "mistral_7b_lora_finetuned"
+OUTPUT_DIR = "Qwen_72B_lora_finetuned"
 
 # Speed-up flags
 torch.backends.cuda.matmul.allow_tf32 = True
