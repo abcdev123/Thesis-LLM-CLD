@@ -86,12 +86,19 @@ def main():
     #     device_map={"": device}
     # )
 
+    # base_model = AutoModelForCausalLM.from_pretrained(
+    #     MODEL_ID,
+    #     # torch_dtype=torch.float16,
+    #     # device_map={"": device},
+    #     device_map="auto",
+    #     torch_dtype=torch.bfloat16
+    # )
+
     base_model = AutoModelForCausalLM.from_pretrained(
         MODEL_ID,
-        # torch_dtype=torch.float16,
-        # device_map={"": device},
-        device_map="auto",
-        torch_dtype=torch.bfloat16
+        load_in_8bit=True,               # <<<<<< Quantize your weights to 8-bit
+        device_map="auto",               # shard layers over your 2 GPUs
+        torch_dtype=torch.float16,       # bfloat16 isn’t supported with 8-bit
     )
 
     # Configure LoRA
