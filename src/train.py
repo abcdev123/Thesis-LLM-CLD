@@ -97,7 +97,8 @@ def main():
     base_model = AutoModelForCausalLM.from_pretrained(
         MODEL_ID,
         load_in_8bit=True,               # <<<<<< Quantize your weights to 8-bit
-        device_map="auto",               # shard layers over your 2 GPUs
+        # device_map="auto",              # shard layers over your 2 GPUs
+        device_map={"": device},
         torch_dtype=torch.float16,       # bfloat16 isn’t supported with 8-bit
     )
 
