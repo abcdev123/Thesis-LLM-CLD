@@ -106,9 +106,9 @@ def main():
     base_model = AutoModelForCausalLM.from_pretrained(
         MODEL_ID,
         quantization_config=bnb_config,
-        # device_map="auto",              # shard layers over your 2 GPUs
+        device_map="auto",              # shard layers over your 2 GPUs
         low_cpu_mem_usage=True,
-        device_map={"": device},
+        # device_map={"": device},
     )
 
     # Configure LoRA
