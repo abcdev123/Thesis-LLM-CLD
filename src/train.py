@@ -80,10 +80,18 @@ def main():
     PAD_ID = tokenizer.pad_token_id
 
     # Load base model
+    # base_model = AutoModelForCausalLM.from_pretrained(
+    #     MODEL_ID,
+    #     # torch_dtype=torch.float16,
+    #     device_map={"": device}
+    # )
+
     base_model = AutoModelForCausalLM.from_pretrained(
         MODEL_ID,
         # torch_dtype=torch.float16,
-        device_map={"": device}
+        device_map={"": device},
+        # device_map="auto",
+        torch_dtype=torch.bfloat16
     )
 
     # Configure LoRA
