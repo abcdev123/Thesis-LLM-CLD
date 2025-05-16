@@ -9,6 +9,7 @@ from transformers import (
     TrainingArguments,
     Trainer,
     DataCollatorForLanguageModeling,
+    BitsAndBytesConfig
 )
 from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 
@@ -94,12 +95,19 @@ def main():
     #     torch_dtype=torch.bfloat16
     # )
 
+
+    bnb_config = BitsAndBytesConfig(
+        load_in_4bit=True,                     # enables 4-bit
+        bnb_4bit_quant_type="nf4",             # or "fp4"
+        bnb_4bit_compute_dtype=torch.bfloat16, # or torch.float16
+        bnb_4bit_use_double_quant=True,        # slightly better accuracy
+    )
+
     base_model = AutoModelForCausalLM.from_pretrained(
         MODEL_ID,
-        load_in_8bit=True,               # <<<<<< Quantize your weights to 8-bit
+        quantization_config=bnb_config,
         # device_map="auto",              # shard layers over your 2 GPUs
         device_map={"": device},
-        torch_dtype=torch.float16,       # bfloat16 isn’t supported with 8-bit
     )
 
     # Configure LoRA
