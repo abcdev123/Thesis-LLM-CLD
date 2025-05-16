@@ -124,14 +124,16 @@ def main():
     # Training arguments
     training_args = TrainingArguments(
         output_dir=OUTPUT_DIR,
-        per_device_train_batch_size=2,
-        per_device_eval_batch_size=2,
+        per_device_train_batch_size=1,
+        per_device_eval_batch_size=1,
+        gradient_accumulation_steps=4,
         num_train_epochs=3,
         evaluation_strategy="steps",
         eval_steps=200,
         save_steps=200,
         logging_steps=50,
-        fp16=False,
+        # fp16=False,
+        bf16=True,
         remove_unused_columns=False,
     )
 
