@@ -71,7 +71,7 @@ def main():
     df = pd.read_excel(DATA_PATH)
     dataset = Dataset.from_pandas(df[["prompt", "completion"]])
     dataset = dataset.shuffle(seed=42)
-    split = dataset.train_test_split(test_size=0.1, seed=42)
+    split = dataset.train_test_split(test_size=0.2, seed=42)
 
     # Load tokenizer and set special tokens
     tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, use_fast=True)
@@ -155,7 +155,8 @@ def main():
         num_train_epochs=3,
         evaluation_strategy="steps",
         eval_steps=200,
-        save_steps=200,
+        # save_steps=200,
+        save_strategy="no",
         logging_steps=50,
         # fp16=False,
         bf16=True,
