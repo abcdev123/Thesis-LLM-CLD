@@ -153,8 +153,12 @@ def main():
     model = get_peft_model(base_model, lora_cfg)
     model.print_trainable_parameters()
 
+    # turn off the transformer cache (incompatible with checkpointing)
+    model.config.use_cache = False
+
     # Enable gradient checkpointing to save memory
     model.gradient_checkpointing_enable()
+    model.enable_input_require_grads()
 
     # 5) Tokenize
     tok_ds = split.map(
