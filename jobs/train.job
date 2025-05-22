@@ -21,6 +21,6 @@ cd $HOME/Thesis-LLM-CLD
 conda activate ./thesis_env
 
 # run the training script
-./thesis_env/bin/python src/train.py
+./thesis_env/bin/python src/train_w_graphs2.py
 
 
