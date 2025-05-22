@@ -153,6 +153,9 @@ def main():
     model = get_peft_model(base_model, lora_cfg)
     model.print_trainable_parameters()
 
+    # Enable gradient checkpointing to save memory
+    model.gradient_checkpointing_enable()
+
     # 5) Tokenize
     tok_ds = split.map(
         lambda r: tokenize(r, tokenizer),
@@ -180,6 +183,7 @@ def main():
         save_strategy="no",
         logging_steps=50,
         bf16=True,
+        gradient_checkpointing=True,
         remove_unused_columns=False,
     )
 
