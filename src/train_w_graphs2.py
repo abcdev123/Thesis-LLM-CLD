@@ -183,13 +183,14 @@ def main():
         per_device_eval_batch_size=1,
         gradient_accumulation_steps=4,
         num_train_epochs=3,
-        evaluation_strategy="steps",
-        eval_steps=200,
+        evaluation_strategy="epoch",    # only eval after each epoch instead of steps
+        # eval_steps=200,
         save_strategy="no",
         logging_steps=50,
         bf16=True,
         gradient_checkpointing=True,
         remove_unused_columns=False,
+        eval_accumulation_steps=1,      # flush after each batch
     )
 
     # 8) Trainer
