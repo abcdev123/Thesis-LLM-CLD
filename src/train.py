@@ -87,29 +87,30 @@ def main():
     #     device_map={"": device}
     # )
 
-    # base_model = AutoModelForCausalLM.from_pretrained(
-    #     MODEL_ID,
-    #     # torch_dtype=torch.float16,
-    #     # device_map={"": device},
-    #     device_map="auto",
-    #     torch_dtype=torch.bfloat16
-    # )
-
-
-    bnb_config = BitsAndBytesConfig(
-        load_in_4bit=True,                     # enables 4-bit
-        bnb_4bit_quant_type="nf4",             # or "fp4"
-        bnb_4bit_compute_dtype=torch.float16, # or torch.float16
-        bnb_4bit_use_double_quant=True,        # slightly better accuracy
-    )
-
     base_model = AutoModelForCausalLM.from_pretrained(
         MODEL_ID,
-        quantization_config=bnb_config,
-        device_map="auto",              # shard layers over your 2 GPUs
-        low_cpu_mem_usage=True,
+        # torch_dtype=torch.float16,
         # device_map={"": device},
+        device_map="auto",
+        torch_dtype=torch.float16,
+        low_cpu_mem_usage=True,
     )
+
+
+    # bnb_config = BitsAndBytesConfig(
+    #     load_in_4bit=True,                     # enables 4-bit
+    #     bnb_4bit_quant_type="nf4",             # or "fp4"
+    #     bnb_4bit_compute_dtype=torch.float16, # or torch.float16
+    #     bnb_4bit_use_double_quant=True,        # slightly better accuracy
+    # )
+
+    # base_model = AutoModelForCausalLM.from_pretrained(
+    #     MODEL_ID,
+    #     quantization_config=bnb_config,
+    #     device_map="auto",              # shard layers over your 2 GPUs
+    #     low_cpu_mem_usage=True,
+    #     # device_map={"": device},
+    # )
 
     # Configure LoRA
 
