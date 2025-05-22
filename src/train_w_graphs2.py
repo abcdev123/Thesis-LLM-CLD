@@ -15,14 +15,15 @@ from transformers import (
 )
 from peft import LoraConfig, get_peft_model
 
-# MODEL_ID   = "mistralai/Mistral-7B-Instruct-v0.2"
+MODEL_ID   = "mistralai/Mistral-7B-Instruct-v0.2"
 # MODEL_ID   = "Qwen/Qwen2.5-72B-Instruct"
-MODEL_ID   = "rombodawg/Rombos-LLM-V2.5-Qwen-32b"
+# MODEL_ID   = "rombodawg/Rombos-LLM-V2.5-Qwen-32b"
 DATA_PATH  = "src/Dataset_Gijs_prompts.xlsx"
 SEQ_LEN    = 1024   # max sequence length
 EOS_ID     = None   # set after tokenizer init
 PAD_ID     = None   # set after tokenizer init
-OUTPUT_DIR = "Rombos_LLM_32B_lora_finetuned"
+# OUTPUT_DIR = "Rombos_LLM_32B_lora_finetuned"
+OUTPUT_DIR = "Mistral_LLM_7B_Instruct-v0.2_lora_finetuned"
 
 # Speed-up flags
 torch.backends.cuda.matmul.allow_tf32 = True
