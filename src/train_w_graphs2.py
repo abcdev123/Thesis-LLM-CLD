@@ -13,7 +13,7 @@ from transformers import (
     DataCollatorForLanguageModeling,
     BitsAndBytesConfig
 )
-from peft import LoraConfig, get_peft_model
+from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 
 MODEL_ID   = "mistralai/Mistral-7B-Instruct-v0.2"
 # MODEL_ID   = "Qwen/Qwen2.5-72B-Instruct"
@@ -23,7 +23,7 @@ SEQ_LEN    = 1024   # max sequence length
 EOS_ID     = None   # set after tokenizer init
 PAD_ID     = None   # set after tokenizer init
 # OUTPUT_DIR = "Rombos_LLM_32B_lora_finetuned"
-OUTPUT_DIR = "Mistral_LLM_7B_Instruct-v0.2_lora_finetuned"
+OUTPUT_DIR = "Mistral_LLM_7B_Instruct-v0.2_Qlora_finetuned"
 
 # Speed-up flags
 torch.backends.cuda.matmul.allow_tf32 = True
@@ -104,20 +104,23 @@ def main():
     EOS_ID = tokenizer.eos_token_id
     PAD_ID = tokenizer.pad_token_id
 
-    # # 3) Load & quantize base model
-    # bnb_cfg = BitsAndBytesConfig(
-    #     load_in_4bit=True,
-    #     bnb_4bit_quant_type="nf4",
-    #     bnb_4bit_compute_dtype=torch.float16,
-    #     bnb_4bit_use_double_quant=True,
-    # )
+    # 3) Load & quantize base model
+    bnb_cfg = BitsAndBytesConfig(
+        load_in_4bit=True,
+        bnb_4bit_quant_type="nf4",
+        bnb_4bit_compute_dtype=torch.float16,
+        bnb_4bit_use_double_quant=True,
+    )
     base_model = AutoModelForCausalLM.from_pretrained(
         MODEL_ID,
-        # quantization_config=bnb_cfg,
+        quantization_config=bnb_cfg,
         device_map="auto",
-        torch_dtype=torch.float16,
+        # torch_dtype=torch.float16,
         low_cpu_mem_usage=True,
     )
+
+    # prepare for qlora
+    base_model = prepare_model_for_kbit_training(base_model)
 
     # 4) LoRA
     lora_cfg = LoraConfig(
