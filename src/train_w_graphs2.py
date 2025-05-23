@@ -53,22 +53,11 @@ def tokenize(row, tokenizer):
     labels = [-100] * prompt_len + ids[prompt_len:]
     return {"input_ids": ids, "attention_mask": attn, "labels": labels}
 
-def compute_metrics(eval_pred):
-    logits, labels = eval_pred
-    # flatten
-    preds = np.argmax(logits, axis=-1).ravel()
-    labels = labels.ravel()
-    mask = labels != -100
-    correct = (preds == labels) & mask
-    accuracy = correct.sum() / mask.sum()
-    return {"eval_accuracy": accuracy}
-
 def plot_training(trainer, output_dir):
     logs = trainer.state.log_history
     steps = [l["step"] for l in logs if "step" in l]
     train_loss = [l["loss"] for l in logs if "loss" in l]
     eval_loss  = [l["eval_loss"] for l in logs if "eval_loss" in l]
-    eval_acc   = [l["eval_accuracy"] for l in logs if "eval_accuracy" in l]
     lr         = [l["learning_rate"] for l in logs if "learning_rate" in l]
 
     # Loss & Perplexity
@@ -87,18 +76,6 @@ def plot_training(trainer, output_dir):
     plt.grid(True)
     plt.tight_layout()
     plt.savefig(os.path.join(output_dir, "loss_ppl_plot.png"))
-
-    # Validation Accuracy
-    if eval_acc:
-        eval_steps = steps[1:1+len(eval_acc)]
-        plt.figure()
-        plt.plot(eval_steps, eval_acc, label="eval_accuracy")
-        plt.xlabel("Step")
-        plt.ylabel("Accuracy")
-        plt.title("Validation Accuracy")
-        plt.grid(True)
-        plt.tight_layout()
-        plt.savefig(os.path.join(output_dir, "accuracy_plot.png"))
 
     # Learning rate
     if lr:
@@ -181,7 +158,7 @@ def main():
         output_dir=OUTPUT_DIR,
         per_device_train_batch_size=1,
         per_device_eval_batch_size=1,
-        gradient_accumulation_steps=4,
+        gradient_accumulation_steps=16,
         num_train_epochs=3,
         evaluation_strategy="epoch",    # only eval after each epoch instead of steps
         # eval_steps=200,
@@ -190,7 +167,7 @@ def main():
         bf16=True,
         gradient_checkpointing=True,
         remove_unused_columns=False,
-        eval_accumulation_steps=1,      # flush after each batch
+        eval_accumulation_steps=1,      # accumulate 1 batch at a time
     )
 
     # 8) Trainer
@@ -201,7 +178,6 @@ def main():
         eval_dataset=tok_ds["test"],
         data_collator=data_collator,
         tokenizer=tokenizer,
-        compute_metrics=compute_metrics,
     )
 
     # 9) Train
