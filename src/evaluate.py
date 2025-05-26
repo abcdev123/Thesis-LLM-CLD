@@ -37,12 +37,11 @@ print(f"Running on device: {DEVICE}")
 # ─── HELPERS ─────────────────────────────────────────────────────────────────────
 def parse_relationship(json_str: str) -> str:
     """
-    Extracts the 'Relationship' (case-insensitive) from the JSON string,
-    or falls back to the raw string if parsing fails.
+    Extracts 'Relationship' (case-insensitive) from the JSON string,
+    or returns the raw lowercased string if parsing fails.
     """
     try:
         obj = json.loads(json_str)
-        # case-insensitive key lookup
         return (obj.get("Relationship") or obj.get("relationship") or "").strip().lower()
     except:
         return json_str.strip().lower()
@@ -51,7 +50,7 @@ def parse_relationship(json_str: str) -> str:
 def evaluate_model(model_name: str, tokenizer, test_ds: Dataset, debug: bool = False):
     print(f"Loading model from {model_name}...")
     model = AutoModelForCausalLM.from_pretrained(model_name).to(DEVICE)
-    # ensure pad_token is set on model
+    # make sure model knows the pad token
     if model.config.pad_token_id is None:
         model.config.pad_token_id = tokenizer.pad_token_id
     model.eval()
@@ -62,28 +61,29 @@ def evaluate_model(model_name: str, tokenizer, test_ds: Dataset, debug: bool = F
         true_completion = ex["completion"]
         true_rel        = parse_relationship(true_completion)
 
-        # tokenize only the prompt (no padding)
+        # tokenize prompt only (no padding)
         enc = tokenizer(
             prompt,
             return_tensors="pt",
             truncation=True,
-            padding=False
+            padding=False,
         ).to(DEVICE)
 
+        # generate exactly MAX_NEW_TOKENS more tokens (disable early EOS)
         with torch.no_grad():
             gen_ids = model.generate(
                 **enc,
                 max_new_tokens=MAX_NEW_TOKENS,
+                eos_token_id=None,
                 pad_token_id=tokenizer.pad_token_id,
             )[0]
 
-        # slice off exactly the prompt length
+        # slice off prompt tokens to get just the new output
         prompt_len = enc["input_ids"].shape[-1]
         new_tokens = gen_ids[prompt_len:].tolist()
         raw_out    = tokenizer.decode(new_tokens, skip_special_tokens=True).strip()
         pred_rel   = parse_relationship(raw_out)
 
-        # debug first few LoRA outputs
         if debug and idx < 5:
             print(f"[DEBUG] example {idx} raw model output: {raw_out!r}")
 
@@ -102,12 +102,12 @@ def evaluate_model(model_name: str, tokenizer, test_ds: Dataset, debug: bool = F
 
 # ─── MAIN ─────────────────────────────────────────────────────────────────────────
 def main():
-    # 1) load raw data & reproduce the 80/20 split
+    # 1) load raw data and reproduce the 80/20 split
     df = pd.read_excel(DATA_PATH)
     ds = Dataset.from_pandas(df[["prompt", "completion"]]).shuffle(seed=42)
     test_ds = ds.train_test_split(test_size=0.2, seed=42)["test"]
 
-    # 2) tokenizer setup
+    # 2) prepare tokenizer
     tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL, use_fast=True)
     tokenizer.padding_side = "left"
     if tokenizer.pad_token is None:
@@ -116,10 +116,9 @@ def main():
     # 3) evaluate both models
     for label, model_name in [("base", BASE_MODEL), ("lora", FINETUNED_MODEL)]:
         print(f"\n>> Evaluating {label} model")
-        # enable debug printing for LoRA
-        trues, preds, records = evaluate_model(model_name, tokenizer,
-                                               test_ds,
-                                               debug=(label=="lora"))
+        trues, preds, records = evaluate_model(
+            model_name, tokenizer, test_ds, debug=(label=="lora")
+        )
 
         # ─── METRICS ───────────────────────────────────────────────────────────
         acc  = accuracy_score(trues, preds)
