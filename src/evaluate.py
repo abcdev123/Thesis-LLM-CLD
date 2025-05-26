@@ -24,7 +24,7 @@ hf_logging.set_verbosity_error()
 # ─── CONFIGURATION ───────────────────────────────────────────────────────────────
 BASE_MODEL        = "mistralai/Mistral-7B-Instruct-v0.2" 
 FINETUNED_MODEL   = "src/Mistral_LLM_7B_Instruct-v0.2_lora_finetuned/merged_fp16" # path to your merged_fp16 folder
-DATA_PATH         = "src/Dataset_Gijs_prompts.xlsx"         # raw data (not used here)
+# DATA_PATH         = "src/Dataset_Gijs_prompts.xlsx"
 OUTPUT_DIR        = "Evaluation_results_26-05-2025_lora"         # where to write all results
 # TOKENIZED_TEST_DIR = os.path.join(OUTPUT_DIR, "tokenized_test")
 TOKENIZED_TEST_DIR = "src/Mistral_LLM_7B_Instruct-v0.2_lora_finetuned/tokenized_test" # path to the tokenized test dataset
@@ -115,11 +115,11 @@ def main():
         f1     = f1_score(trues, preds, average="weighted", zero_division=0)
         report = classification_report(trues, preds, digits=4, zero_division=0)
         # cm     = confusion_matrix(trues, preds, labels=["positive", "negative", "none"])
-        
+
         # only keep labels that actually appear in the true set
-        all_labels    = ["positive", "negative", "none"]
-        present_labels = [lbl for lbl in all_labels if lbl in trues]
-        cm = confusion_matrix(trues, preds, labels=present_labels)
+        # all_labels    = ["positive", "negative", "none"]
+        # present_labels = [lbl for lbl in all_labels if lbl in trues]
+        # cm = confusion_matrix(trues, preds, labels=present_labels)
 
         # print summary
         print(f"  Accuracy : {acc*100:6.2f}%")
@@ -129,7 +129,7 @@ def main():
         print("  Classification report:")
         print(report)
         print("  Confusion matrix (rows=true, cols=pred | order: positive, negative, none):")
-        print(cm)
+        # print(cm)
 
         # write detailed Excel
         excel_path = os.path.join(OUTPUT_DIR, f"{name}_results.xlsx")
