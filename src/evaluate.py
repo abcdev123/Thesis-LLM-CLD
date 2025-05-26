@@ -69,10 +69,14 @@ def evaluate_model(model_dir, tokenizer, test_dataset):
 
         pred_relation = rel.strip().lower()
 
-        # decode the true label
+        # decode the true label, dropping any -100 entries and special tokens
         label_ids = ex.get("labels", [])
+        valid_label_ids = [
+            t for t in label_ids
+            if t >= 0 and t not in tokenizer.all_special_ids
+        ]
         true_text = tokenizer.decode(
-            [t for t in label_ids if t not in tokenizer.all_special_ids],
+            valid_label_ids,
             skip_special_tokens=True
         ).strip().lower()
 
@@ -90,7 +94,8 @@ def evaluate_model(model_dir, tokenizer, test_dataset):
 # ─── MAIN ────────────────────────────────────────────────────────────────────────
 def main():
     tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL, use_fast=True)
-    test_ds   = load_from_disk(TOKENIZED_TEST_DIR)
+    tokenizer.padding_side = "left"  # ensure correct padding for decoder-only models
+    test_ds = load_from_disk(TOKENIZED_TEST_DIR)
 
     for name, model_path in [("base", BASE_MODEL), ("lora", FINETUNED_MODEL)]:
         print(f"\n>> Evaluating `{name}` model ({model_path})")
@@ -102,7 +107,7 @@ def main():
         rec    = recall_score(trues, preds, average="weighted", zero_division=0)
         f1     = f1_score(trues, preds, average="weighted", zero_division=0)
         report = classification_report(trues, preds, digits=4, zero_division=0)
-        cm     = confusion_matrix(trues, preds, labels=["positive","negative","none"])
+        cm     = confusion_matrix(trues, preds, labels=["positive", "negative", "none"])
 
         # print summary
         print(f"  Accuracy : {acc*100:6.2f}%")
