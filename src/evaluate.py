@@ -3,7 +3,11 @@ import os
 import torch
 import json
 import pandas as pd
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import (
+    AutoTokenizer,
+    AutoModelForCausalLM,
+    logging as hf_logging,
+)
 from datasets import load_from_disk
 from sklearn.metrics import (
     accuracy_score,
@@ -13,6 +17,9 @@ from sklearn.metrics import (
     classification_report,
     confusion_matrix,
 )
+
+# ─── SILENCE TRANSFORMERS PADDING WARNINGS ───────────────────────────────────────
+hf_logging.set_verbosity_error()
 
 # ─── CONFIGURATION ───────────────────────────────────────────────────────────────
 BASE_MODEL        = "mistralai/Mistral-7B-Instruct-v0.2" 
@@ -107,7 +114,12 @@ def main():
         rec    = recall_score(trues, preds, average="weighted", zero_division=0)
         f1     = f1_score(trues, preds, average="weighted", zero_division=0)
         report = classification_report(trues, preds, digits=4, zero_division=0)
-        cm     = confusion_matrix(trues, preds, labels=["positive", "negative", "none"])
+        # cm     = confusion_matrix(trues, preds, labels=["positive", "negative", "none"])
+        
+        # only keep labels that actually appear in the true set
+        all_labels    = ["positive", "negative", "none"]
+        present_labels = [lbl for lbl in all_labels if lbl in trues]
+        cm = confusion_matrix(trues, preds, labels=present_labels)
 
         # print summary
         print(f"  Accuracy : {acc*100:6.2f}%")
