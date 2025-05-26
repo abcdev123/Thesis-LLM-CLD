@@ -19,7 +19,7 @@ from sklearn.metrics import (
     confusion_matrix,
 )
 
-# ─── SILENCE WARNINGS ─────────────────────────────────────────────────────────────
+# ─── QUIET WARNINGS ──────────────────────────────────────────────────────────────
 warnings.filterwarnings("ignore", message=".*right-padding was detected.*")
 hf_logging.set_verbosity_error()
 
@@ -36,31 +36,38 @@ print(f"Running on device: {DEVICE}")
 
 # ─── HELPERS ─────────────────────────────────────────────────────────────────────
 def parse_relationship(json_str: str) -> str:
+    """
+    Extracts the 'Relationship' (case-insensitive) from the JSON string,
+    or falls back to the raw string if parsing fails.
+    """
     try:
-        return json.loads(json_str)["Relationship"].strip().lower()
+        obj = json.loads(json_str)
+        # case-insensitive key lookup
+        return (obj.get("Relationship") or obj.get("relationship") or "").strip().lower()
     except:
         return json_str.strip().lower()
 
 # ─── EVALUATION FUNCTION ─────────────────────────────────────────────────────────
-def evaluate_model(model_name: str, tokenizer, test_ds: Dataset):
-    # load model and ensure it knows the pad token
+def evaluate_model(model_name: str, tokenizer, test_ds: Dataset, debug: bool = False):
+    print(f"Loading model from {model_name}...")
     model = AutoModelForCausalLM.from_pretrained(model_name).to(DEVICE)
+    # ensure pad_token is set on model
     if model.config.pad_token_id is None:
         model.config.pad_token_id = tokenizer.pad_token_id
     model.eval()
 
     preds, trues, records = [], [], []
-    for ex in test_ds:
+    for idx, ex in enumerate(test_ds):
         prompt          = ex["prompt"]
         true_completion = ex["completion"]
         true_rel        = parse_relationship(true_completion)
 
-        # tokenize just the prompt (needs pad_token defined)
+        # tokenize only the prompt (no padding)
         enc = tokenizer(
             prompt,
             return_tensors="pt",
-            padding=True,
             truncation=True,
+            padding=False
         ).to(DEVICE)
 
         with torch.no_grad():
@@ -70,10 +77,15 @@ def evaluate_model(model_name: str, tokenizer, test_ds: Dataset):
                 pad_token_id=tokenizer.pad_token_id,
             )[0]
 
-        # grab only the newly generated tokens
-        appended = gen_ids[enc["input_ids"].shape[-1] :].tolist()
-        raw_out  = tokenizer.decode(appended, skip_special_tokens=True).strip()
-        pred_rel = parse_relationship(raw_out)
+        # slice off exactly the prompt length
+        prompt_len = enc["input_ids"].shape[-1]
+        new_tokens = gen_ids[prompt_len:].tolist()
+        raw_out    = tokenizer.decode(new_tokens, skip_special_tokens=True).strip()
+        pred_rel   = parse_relationship(raw_out)
+
+        # debug first few LoRA outputs
+        if debug and idx < 5:
+            print(f"[DEBUG] example {idx} raw model output: {raw_out!r}")
 
         preds.append(pred_rel)
         trues.append(true_rel)
@@ -83,19 +95,19 @@ def evaluate_model(model_name: str, tokenizer, test_ds: Dataset):
             "pred_json": raw_out,
             "true_rel":  true_rel,
             "pred_rel":  pred_rel,
-            "correct":   pred_rel == true_rel,
+            "correct":   (pred_rel == true_rel),
         })
 
     return trues, preds, records
 
 # ─── MAIN ─────────────────────────────────────────────────────────────────────────
 def main():
-    # 1) load raw data & make the same test split
+    # 1) load raw data & reproduce the 80/20 split
     df = pd.read_excel(DATA_PATH)
     ds = Dataset.from_pandas(df[["prompt", "completion"]]).shuffle(seed=42)
     test_ds = ds.train_test_split(test_size=0.2, seed=42)["test"]
 
-    # 2) prepare tokenizer
+    # 2) tokenizer setup
     tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL, use_fast=True)
     tokenizer.padding_side = "left"
     if tokenizer.pad_token is None:
@@ -103,21 +115,24 @@ def main():
 
     # 3) evaluate both models
     for label, model_name in [("base", BASE_MODEL), ("lora", FINETUNED_MODEL)]:
-        print(f"\n>> Evaluating {label} ({model_name})")
-        trues, preds, records = evaluate_model(model_name, tokenizer, test_ds)
+        print(f"\n>> Evaluating {label} model")
+        # enable debug printing for LoRA
+        trues, preds, records = evaluate_model(model_name, tokenizer,
+                                               test_ds,
+                                               debug=(label=="lora"))
 
-        # compute metrics
-        acc    = accuracy_score(trues, preds)
-        prec   = precision_score(trues, preds, average="weighted", zero_division=0)
-        rec    = recall_score(trues, preds, average="weighted", zero_division=0)
-        f1     = f1_score(trues, preds, average="weighted", zero_division=0)
+        # ─── METRICS ───────────────────────────────────────────────────────────
+        acc  = accuracy_score(trues, preds)
+        prec = precision_score(trues, preds, average="weighted", zero_division=0)
+        rec  = recall_score(trues, preds, average="weighted", zero_division=0)
+        f1   = f1_score(trues, preds, average="weighted", zero_division=0)
         report_dict = classification_report(
             trues, preds, digits=4, zero_division=0, output_dict=True
         )
-        present = sorted(set(trues))
-        cm = confusion_matrix(trues, preds, labels=present)
+        labels = sorted(set(trues))
+        cm = confusion_matrix(trues, preds, labels=labels)
 
-        # build DataFrames
+        # ─── BUILD DATAFRAMES & WRITE EXCEL ──────────────────────────────────
         df_records = pd.DataFrame.from_records(records)
         df_metrics = pd.DataFrame([{
             "accuracy":  acc,
@@ -127,19 +142,19 @@ def main():
             "n_samples": len(trues),
         }])
         df_report = pd.DataFrame(report_dict).transpose()
-        df_cm     = pd.DataFrame(cm, index=present, columns=present)
+        df_cm     = pd.DataFrame(cm, index=labels, columns=labels)
 
-        # write all sheets to one Excel file
         out_path = os.path.join(OUTPUT_DIR, f"{label}_results.xlsx")
         with pd.ExcelWriter(out_path) as writer:
             df_records.to_excel(writer, sheet_name="per_example", index=False)
             df_metrics.to_excel(writer, sheet_name="metrics", index=False)
             df_report.to_excel(writer, sheet_name="report")
             df_cm.to_excel(writer, sheet_name="confusion")
-        print("  → Results saved to:", out_path)
+        print(f"  → Results saved to: {out_path}")
 
 if __name__ == "__main__":
     main()
+
 
 
 
