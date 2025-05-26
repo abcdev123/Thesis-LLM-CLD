@@ -94,7 +94,7 @@ def evaluate_model(model_dir, tokenizer, test_dataset):
 # ─── MAIN ────────────────────────────────────────────────────────────────────────
 def main():
     tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL, use_fast=True)
-    tokenizer.padding_side = "left"  # ensure correct padding for decoder-only models
+    tokenizer.padding_side='left'  # ensure correct padding for decoder-only models
     test_ds = load_from_disk(TOKENIZED_TEST_DIR)
 
     for name, model_path in [("base", BASE_MODEL), ("lora", FINETUNED_MODEL)]:
