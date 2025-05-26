@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import re
 import json
 import torch
 import warnings
@@ -27,7 +28,7 @@ hf_logging.set_verbosity_error()
 BASE_MODEL      = "mistralai/Mistral-7B-Instruct-v0.2"
 FINETUNED_MODEL = "src/Mistral_LLM_7B_Instruct-v0.2_lora_finetuned/merged_fp16"
 DATA_PATH       = "src/Dataset_Gijs_prompts.xlsx"
-OUTPUT_DIR      = "Evaluation_results_27-05-2025_lora"
+OUTPUT_DIR      = "Evaluation_results_26-05-2025_lora"
 MAX_NEW_TOKENS  = 10
 DEVICE          = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -35,22 +36,18 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 print(f"Running on device: {DEVICE}")
 
 # ─── HELPERS ─────────────────────────────────────────────────────────────────────
-def parse_relationship(json_str: str) -> str:
+def parse_relationship_from_output(text: str) -> str:
     """
-    Extracts 'Relationship' (case-insensitive) from the JSON string,
-    or returns the raw lowercased string if parsing fails.
+    Use regex to pull exactly the value behind "relationship":"...".
+    Returns 'positive', 'negative', or 'none' (lowercased), or '' if not found.
     """
-    try:
-        obj = json.loads(json_str)
-        return (obj.get("Relationship") or obj.get("relationship") or "").strip().lower()
-    except:
-        return json_str.strip().lower()
+    match = re.search(r'[Rr]elationship"\s*:\s*"([^"]+)"', text)
+    return match.group(1).strip().lower() if match else ""
 
 # ─── EVALUATION FUNCTION ─────────────────────────────────────────────────────────
 def evaluate_model(model_name: str, tokenizer, test_ds: Dataset, debug: bool = False):
     print(f"Loading model from {model_name}...")
     model = AutoModelForCausalLM.from_pretrained(model_name).to(DEVICE)
-    # make sure model knows the pad token
     if model.config.pad_token_id is None:
         model.config.pad_token_id = tokenizer.pad_token_id
     model.eval()
@@ -59,7 +56,9 @@ def evaluate_model(model_name: str, tokenizer, test_ds: Dataset, debug: bool = F
     for idx, ex in enumerate(test_ds):
         prompt          = ex["prompt"]
         true_completion = ex["completion"]
-        true_rel        = parse_relationship(true_completion)
+
+        # parse ground-truth
+        true_rel = parse_relationship_from_output(true_completion)
 
         # tokenize prompt only (no padding)
         enc = tokenizer(
@@ -69,7 +68,7 @@ def evaluate_model(model_name: str, tokenizer, test_ds: Dataset, debug: bool = F
             padding=False,
         ).to(DEVICE)
 
-        # generate exactly MAX_NEW_TOKENS more tokens (disable early EOS)
+        # generate exactly MAX_NEW_TOKENS tokens (disable early EOS)
         with torch.no_grad():
             gen_ids = model.generate(
                 **enc,
@@ -78,36 +77,37 @@ def evaluate_model(model_name: str, tokenizer, test_ds: Dataset, debug: bool = F
                 pad_token_id=tokenizer.pad_token_id,
             )[0]
 
-        # slice off prompt tokens to get just the new output
+        # slice off prompt tokens
         prompt_len = enc["input_ids"].shape[-1]
         new_tokens = gen_ids[prompt_len:].tolist()
-        raw_out    = tokenizer.decode(new_tokens, skip_special_tokens=True).strip()
-        pred_rel   = parse_relationship(raw_out)
+        raw_output = tokenizer.decode(new_tokens, skip_special_tokens=True).strip()
+
+        # parse only the relationship field
+        pred_rel = parse_relationship_from_output(raw_output)
 
         if debug and idx < 5:
-            print(f"[DEBUG] example {idx} raw model output: {raw_out!r}")
+            print(f"[DEBUG] sample {idx} raw output: {raw_output!r} -> pred_rel: {pred_rel!r}")
 
         preds.append(pred_rel)
         trues.append(true_rel)
         records.append({
-            "prompt":    prompt,
-            "true_json": true_completion,
-            "pred_json": raw_out,
-            "true_rel":  true_rel,
-            "pred_rel":  pred_rel,
-            "correct":   (pred_rel == true_rel),
+            "prompt":   prompt,
+            "true":     true_rel,
+            "output":   raw_output,
+            "pred_rel": pred_rel,
+            "correct":  (pred_rel == true_rel),
         })
 
     return trues, preds, records
 
 # ─── MAIN ─────────────────────────────────────────────────────────────────────────
 def main():
-    # 1) load raw data and reproduce the 80/20 split
+    # 1) load raw data & make 80/20 split
     df = pd.read_excel(DATA_PATH)
     ds = Dataset.from_pandas(df[["prompt", "completion"]]).shuffle(seed=42)
     test_ds = ds.train_test_split(test_size=0.2, seed=42)["test"]
 
-    # 2) prepare tokenizer
+    # 2) tokenizer
     tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL, use_fast=True)
     tokenizer.padding_side = "left"
     if tokenizer.pad_token is None:
@@ -128,10 +128,10 @@ def main():
         report_dict = classification_report(
             trues, preds, digits=4, zero_division=0, output_dict=True
         )
-        labels = sorted(set(trues))
+        labels = sorted(l for l in ["positive","negative","none"] if l in trues)
         cm = confusion_matrix(trues, preds, labels=labels)
 
-        # ─── BUILD DATAFRAMES & WRITE EXCEL ──────────────────────────────────
+        # ─── BUILD & WRITE EXCEL ───────────────────────────────────────────────
         df_records = pd.DataFrame.from_records(records)
         df_metrics = pd.DataFrame([{
             "accuracy":  acc,
@@ -153,6 +153,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
