@@ -9,6 +9,7 @@
 #SBATCH --cpus-per-task=8          # CPU cores per task
 #SBATCH --mem=64G                  # memory per node
 #SBATCH --time=03:00:00            # max runtime (HH:MM:SS)
+#SBATCH -o jobs/logs/eval_%j.log
 
 # Move to the directory where the job was submitted
 cd "$SLURM_SUBMIT_DIR"
