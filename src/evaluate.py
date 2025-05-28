@@ -21,14 +21,14 @@ from sklearn.metrics import (
 )
 
 # ─── QUIET WARNINGS ─────────────────────────────────────────────────────────────
-warnings.filterwarnings("ignore", message=".*right-padding was detected.*")
-hf_logging.set_verbosity_error()
+# warnings.filterwarnings("ignore", message=".*right-padding was detected.*")
+# hf_logging.set_verbosity_error()
 
 # ─── CONFIGURATION ───────────────────────────────────────────────────────────────
 BASE_MODEL      = "mistralai/Mistral-7B-Instruct-v0.2"
 FINETUNED_MODEL = "src/Mistral_LLM_7B_Instruct-v0.2_lora_finetuned/merged_fp16"
 DATA_PATH       = "src/Dataset_Gijs_prompts.xlsx"
-OUTPUT_DIR      = "Evaluation_results_28-05-2025_lora"
+OUTPUT_DIR      = "Evaluation_results_28-05-2025_lora-2"
 SEQ_LEN         = 1024 
 MAX_NEW_TOKENS  = 100
 DEVICE          = "cuda" if torch.cuda.is_available() else "cpu"
@@ -85,7 +85,8 @@ def evaluate_model(model_name: str, tokenizer, test_ds: Dataset, debug: bool = F
             ids = model.generate(
                 **encodings,
                 max_new_tokens=MAX_NEW_TOKENS,
-                eos_token_id=None,
+                # eos_token_id=None,
+                eos_token_id=tokenizer.eos_token_id,
                 pad_token_id=tokenizer.pad_token_id,
             )[0]
 
@@ -118,7 +119,7 @@ def main():
     test  = ds.train_test_split(test_size=0.2, seed=42)["test"]
 
     # prepare tokenizer
-    tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL, use_fast=True)
+    tokenizer = AutoTokenizer.from_pretrained(FINETUNED_MODEL, use_fast=True)
     tokenizer.padding_side = "left"
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
