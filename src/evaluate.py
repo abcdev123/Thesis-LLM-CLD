@@ -28,8 +28,9 @@ hf_logging.set_verbosity_error()
 BASE_MODEL      = "mistralai/Mistral-7B-Instruct-v0.2"
 FINETUNED_MODEL = "src/Mistral_LLM_7B_Instruct-v0.2_lora_finetuned/merged_fp16"
 DATA_PATH       = "src/Dataset_Gijs_prompts.xlsx"
-OUTPUT_DIR      = "Evaluation_results_26-05-2025_lora"
-MAX_NEW_TOKENS  = 50   # <-- bump this up for longer JSON+explanation
+OUTPUT_DIR      = "Evaluation_results_28-05-2025_lora"
+SEQ_LEN         = 1024 
+MAX_NEW_TOKENS  = 100
 DEVICE          = "cuda" if torch.cuda.is_available() else "cpu"
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -59,27 +60,37 @@ def evaluate_model(model_name: str, tokenizer, test_ds: Dataset, debug: bool = F
         true_rel        = parse_relationship_from_output(true_completion)
 
         # ─── wrap in [INST] tags ────────────────────────────────────────────
-        wrapped = f"<s>[INST] {prompt} [/INST] "
+        # wrapped = f"<s>[INST] {prompt} [/INST] "
+        # wrapped = prompt
 
         # ─── tokenize ONLY the wrapped prompt ───────────────────────────────
-        enc = tokenizer(
-            wrapped,
-            return_tensors="pt",
+        # encodings = tokenizer(
+        #     wrapped,
+        #     return_tensors="pt",
+        #     truncation=True,
+        #     padding=False,
+        # ).to(DEVICE)
+
+        encodings = tokenizer(
+            prompt,
             truncation=True,
+            max_length=SEQ_LEN,
             padding=False,
+            add_special_tokens=False,
+            return_tensors="pt",
         ).to(DEVICE)
 
         # ─── generate exactly MAX_NEW_TOKENS (disable early EOS) ────────────
         with torch.no_grad():
             ids = model.generate(
-                **enc,
+                **encodings,
                 max_new_tokens=MAX_NEW_TOKENS,
                 eos_token_id=None,
                 pad_token_id=tokenizer.pad_token_id,
             )[0]
 
         # ─── slice off prompt tokens to get only the model’s output ────────
-        prompt_len  = enc["input_ids"].shape[-1]
+        prompt_len  = encodings["input_ids"].shape[-1]
         new_tokens  = ids[prompt_len:].tolist()
         raw_output  = tokenizer.decode(new_tokens, skip_special_tokens=True).strip()
         pred_rel    = parse_relationship_from_output(raw_output)
