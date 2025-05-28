@@ -28,9 +28,9 @@ from sklearn.metrics import (
 BASE_MODEL      = "mistralai/Mistral-7B-Instruct-v0.2"
 FINETUNED_MODEL = "src/Mistral_LLM_7B_Instruct-v0.2_lora_finetuned/merged_fp16"
 DATA_PATH       = "src/Dataset_Gijs_prompts.xlsx"
-OUTPUT_DIR      = "Evaluation_results_28-05-2025_lora-2"
+OUTPUT_DIR      = "Evaluation_results_28-05-2025_lora-3"
 SEQ_LEN         = 1024 
-MAX_NEW_TOKENS  = 100
+MAX_NEW_TOKENS  = 50
 DEVICE          = "cuda" if torch.cuda.is_available() else "cpu"
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -54,7 +54,7 @@ def evaluate_model(model_name: str, tokenizer, test_ds: Dataset, debug: bool = F
     model.eval()
 
     trues, preds, records = [], [], []
-    for idx, ex in enumerate(test_ds):
+    for idx, ex in enumerate(test_ds[0:10]):
         prompt          = ex["prompt"]
         true_completion = ex["completion"]
         true_rel        = parse_relationship_from_output(true_completion)
@@ -120,7 +120,8 @@ def main():
 
     # prepare tokenizer
     tokenizer = AutoTokenizer.from_pretrained(FINETUNED_MODEL, use_fast=True)
-    tokenizer.padding_side = "left"
+    # tokenizer.padding_side = "left"
+    tokenizer.padding_side = "right"
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
