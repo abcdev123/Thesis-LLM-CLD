@@ -129,7 +129,7 @@ def main():
     for label, model_name in [("base", BASE_MODEL), ("lora", FINETUNED_MODEL)]:
         print(f"\n>> Evaluating {label} model")
         trues, preds, records = evaluate_model(
-            model_name, tokenizer, test_dataset[0:10], debug=(label=="lora")
+            model_name, tokenizer, test_dataset, debug=(label=="lora")
         )
 
         # compute metrics
