@@ -1,0 +1,23 @@
+#!/bin/bash
+
+#SBATCH -J test_inference                  # job name
+#SBATCH --partition=gpu_h100               # partition to use
+#SBATCH --gres=gpu:1                       # request 1 GPU
+#SBATCH --ntasks=1                         # number of tasks (processes)
+#SBATCH --cpus-per-task=4                  # CPU cores per task
+#SBATCH --mem=32G                          # total memory
+#SBATCH --time=01:00:00                    # max runtime (HH:MM:SS)
+#SBATCH -o jobs/logs/test_inference_%j.log # STDOUT log file
+
+module purge
+module load 2024
+module load Anaconda3/2024.06-1
+
+# Navigate to project directory
+cd $HOME/Thesis-LLM-CLD
+
+# Activate Conda environment
+conda activate ./thesis_env
+
+# Run the inference script
+./thesis_env/bin/python test_inference.py
