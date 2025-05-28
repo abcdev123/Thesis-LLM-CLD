@@ -3,7 +3,7 @@ import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
 # ─── CONFIG ─────────────────────────────────────────────────────────────────────
-MODEL_DIR      = "src/Mistral_LLM_7B_v0.1_Base_lora_finetuned/merged_fp16"
+MODEL_DIR      = "src/Mistral_LLM_7B_v0.1_Base_lora_finetuned/merged_fp16_7Bv0.1"
 DEVICE         = "cuda" if torch.cuda.is_available() else "cpu"
 DTYPE          = torch.float16 if DEVICE == "cuda" else torch.float32
 SEQ_LEN        = 1024
