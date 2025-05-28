@@ -20,4 +20,4 @@ cd $HOME/Thesis-LLM-CLD
 conda activate ./thesis_env
 
 # Run the inference script
-./thesis_env/bin/python test_inference.py
+./thesis_env/bin/python src/test_inference.py
