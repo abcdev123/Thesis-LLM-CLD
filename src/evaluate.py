@@ -25,12 +25,13 @@ from sklearn.metrics import (
 # hf_logging.set_verbosity_error()
 
 # ─── CONFIGURATION ───────────────────────────────────────────────────────────────
-BASE_MODEL      = "mistralai/Mistral-7B-Instruct-v0.2"
-FINETUNED_MODEL = "src/Mistral_LLM_7B_Instruct-v0.2_lora_finetuned/merged_fp16"
+# BASE_MODEL    = "mistralai/Mistral-7B-Instruct-v0.2"
+BASE_MODEL      = "mistralai/Mistral-7B-v0.1"  # Base Mistral
+FINETUNED_MODEL = "src/Mistral_LLM_7B_v0.1_Base_lora_finetuned/merged_fp16_7Bv0.1"  # Path to your fine-tuned model
 DATA_PATH       = "src/Dataset_Gijs_prompts.xlsx"
-OUTPUT_DIR      = "Evaluation_results_28-05-2025_lora-3"
-SEQ_LEN         = 1024 
-MAX_NEW_TOKENS  = 50
+OUTPUT_DIR      = "Evaluation_results_28-05-2025_lora-4"
+SEQ_LEN         = 1024
+MAX_NEW_TOKENS  = 100
 DEVICE          = "cuda" if torch.cuda.is_available() else "cpu"
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
