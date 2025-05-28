@@ -442,7 +442,7 @@ DATA_PATH  = "src/Dataset_Gijs_prompts.xlsx"
 SEQ_LEN    = 1024   # <= 8192 for base model
 EOS_ID     = None   # will set after tokenizer init
 PAD_ID     = None   # will set after tokenizer init
-OUTPUT_DIR = "Mistral_LLM_7B_Base_Qlora_finetuned"
+OUTPUT_DIR = "Mistral_LLM_7B_v0.1_Base_lora_finetuned"
 
 # Speed-up flags
 torch.backends.cuda.matmul.allow_tf32 = True
