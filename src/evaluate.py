@@ -29,7 +29,7 @@ from sklearn.metrics import (
 BASE_MODEL      = "mistralai/Mistral-7B-v0.1"  # Base Mistral
 FINETUNED_MODEL = "src/Mistral_LLM_7B_v0.1_Base_lora_finetuned/merged_fp16_7Bv0.1"  # Path to your fine-tuned model
 DATA_PATH       = "src/Dataset_Gijs_prompts.xlsx"
-OUTPUT_DIR      = "Evaluation_results_28-05-2025_lora-4"
+OUTPUT_DIR      = "Evaluation_results_29-05-2025_lora-5"
 SEQ_LEN         = 1024
 MAX_NEW_TOKENS  = 100
 DEVICE          = "cuda" if torch.cuda.is_available() else "cpu"
@@ -86,8 +86,8 @@ def evaluate_model(model_name: str, tokenizer, test_ds: Dataset, debug: bool = F
             ids = model.generate(
                 **encodings,
                 max_new_tokens=MAX_NEW_TOKENS,
-                # eos_token_id=None,
-                eos_token_id=tokenizer.eos_token_id,
+                eos_token_id=None,
+                # eos_token_id=tokenizer.eos_token_id,
                 pad_token_id=tokenizer.pad_token_id,
             )[0]
 
