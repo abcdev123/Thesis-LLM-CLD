@@ -54,7 +54,7 @@ def evaluate_model(model_name: str, tokenizer, test_ds: Dataset, debug: bool = F
     model.eval()
 
     trues, preds, records = [], [], []
-    for idx, ex in enumerate(test_ds[0:10]):
+    for idx, ex in enumerate(test_ds):
         prompt          = ex["prompt"]
         true_completion = ex["completion"]
         true_rel        = parse_relationship_from_output(true_completion)
@@ -116,7 +116,7 @@ def main():
     # load & split
     df    = pd.read_excel(DATA_PATH)
     ds    = Dataset.from_pandas(df[["prompt","completion"]]).shuffle(seed=42)
-    test  = ds.train_test_split(test_size=0.2, seed=42)["test"]
+    test_dataset  = ds.train_test_split(test_size=0.2, seed=42)["test"]
 
     # prepare tokenizer
     tokenizer = AutoTokenizer.from_pretrained(FINETUNED_MODEL, use_fast=True)
@@ -129,7 +129,7 @@ def main():
     for label, model_name in [("base", BASE_MODEL), ("lora", FINETUNED_MODEL)]:
         print(f"\n>> Evaluating {label} model")
         trues, preds, records = evaluate_model(
-            model_name, tokenizer, test, debug=(label=="lora")
+            model_name, tokenizer, test_dataset[0:10], debug=(label=="lora")
         )
 
         # compute metrics
