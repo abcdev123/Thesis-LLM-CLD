@@ -33,14 +33,9 @@ def load_model():
             MODEL_DIR,
             quantization_config=bnb_cfg,
             device_map="auto",
+            torch_dtype=DTYPE,
             low_cpu_mem_usage=True,
         )
-
-    model = AutoModelForCausalLM.from_pretrained(
-            MODEL_DIR,
-            torch_dtype=DTYPE,
-            low_cpu_mem_usage=(DEVICE == "cpu"),
-        ).to(DEVICE)
 
     # Ensure pad token is defined
     if tokenizer.pad_token_id is None:
