@@ -4,10 +4,11 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 
 # ─── CONFIG ─────────────────────────────────────────────────────────────────────
 # MODEL_DIR      = "mistralai/Mistral-7B-v0.1"            # base Mistral checkpoint
-MODEL_DIR      = "src/Mistral_LLM_7B_Instruct-v0.2_lora_finetuned/merged_fp16"  # Path to your fine-tuned model
+# MODEL_DIR      = "src/Mistral_LLM_7B_Instruct-v0.2_lora_finetuned/merged_fp16"  # Path to your fine-tuned model
+MODEL_DIR      = "src/Mistral_LLM_7B_Instruct-v0.2_lora_finetuned_w_wrapping"
 DEVICE         = "cuda" if torch.cuda.is_available() else "cpu"
 DTYPE          = torch.float16 if DEVICE == "cuda" else torch.float32
-SEQ_LEN        = 1024
+SEQ_LEN        = 2048
 MAX_NEW_TOKENS = 100
 
 # ─── MODEL LOADING ───────────────────────────────────────────────────────────────
@@ -37,15 +38,16 @@ def generate_response(prompt: str, tokenizer, model) -> str:
     Wraps the raw prompt in an Instruction/Response template, then generates.
     """
     # Build the wrapper
-    wrapper = (
-        "### Instruction:\n"
-        f"{prompt}\n"
-        "### Response:\n"
-    )
+    # wrapper = (
+    #     "### Instruction:\n"
+    #     f"{prompt}\n"
+    #     "### Response:\n"
+    # )
+    wrapped = f"<s>[INST] {prompt} [/INST]"
 
     # Tokenize the wrapped prompt (includes BOS/EOS)
     enc = tokenizer(
-        wrapper,
+        wrapped,
         return_tensors="pt",
         truncation=True,
         max_length=SEQ_LEN,
