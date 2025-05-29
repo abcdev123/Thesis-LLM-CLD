@@ -130,7 +130,7 @@ def main():
     split = ds.train_test_split(test_size=0.2, seed=42)
 
     # 2) Tokenizer
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, use_fast=False, trust_remote_code=True)
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, use_fast=True, trust_remote_code=True)
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
     pad_id = tokenizer.pad_token_id
