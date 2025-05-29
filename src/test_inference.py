@@ -3,7 +3,8 @@ import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
 # ─── CONFIG ─────────────────────────────────────────────────────────────────────
-MODEL_DIR      = "mistralai/Mistral-7B-v0.1"            # base Mistral checkpoint
+# MODEL_DIR      = "mistralai/Mistral-7B-v0.1"            # base Mistral checkpoint
+MODEL_DIR      = "src/Mistral_LLM_7B_Instruct-v0.2_lora_finetuned/merged_fp16"  # Path to your fine-tuned model
 DEVICE         = "cuda" if torch.cuda.is_available() else "cpu"
 DTYPE          = torch.float16 if DEVICE == "cuda" else torch.float32
 SEQ_LEN        = 1024
