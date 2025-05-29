@@ -68,8 +68,8 @@ def main():
     tokenizer, model = load_model()
 
     test_prompts = [
-        "You are a scientific system dynamics model expert. Given 'More chickens' and 'More eggs', what is the causal relationship?",
-        "You are a scientific system dynamics model expert. Given 'Price drops' and 'Sales rise', what is the causal relationship?",
+        "You are a scientific system dynamics model expert. Given 'More chickens' and 'More eggs', what is the causal relationship? Don't repeat the prompt, just return the relationship only.",
+        "You are a scientific system dynamics model expert. Given 'Price drops' and 'Sales rise', what is the causal relationship? Don't repeat the prompt, just return the relationship only.",
     ]
 
     for prompt in test_prompts:
