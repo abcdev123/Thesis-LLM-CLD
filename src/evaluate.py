@@ -64,6 +64,12 @@ def evaluate_model(model_name: str, tokenizer, test_ds: Dataset, debug: bool = F
         # wrapped = f"<s>[INST] {prompt} [/INST] "
         # wrapped = prompt
 
+        wrapper = (
+            "### Instruction:\n"
+            f"{prompt}\n"
+            "### Response:\n"
+        )
+
         # ─── tokenize ONLY the wrapped prompt ───────────────────────────────
         # encodings = tokenizer(
         #     wrapped,
@@ -73,11 +79,11 @@ def evaluate_model(model_name: str, tokenizer, test_ds: Dataset, debug: bool = F
         # ).to(DEVICE)
 
         encodings = tokenizer(
-            prompt,
+            wrapper,
             truncation=True,
             max_length=SEQ_LEN,
             padding=False,
-            add_special_tokens=False,
+            add_special_tokens=True,
             return_tensors="pt",
         ).to(DEVICE)
 
@@ -86,8 +92,8 @@ def evaluate_model(model_name: str, tokenizer, test_ds: Dataset, debug: bool = F
             ids = model.generate(
                 **encodings,
                 max_new_tokens=MAX_NEW_TOKENS,
-                eos_token_id=None,
-                # eos_token_id=tokenizer.eos_token_id,
+                # eos_token_id=None,
+                eos_token_id=tokenizer.eos_token_id,
                 pad_token_id=tokenizer.pad_token_id,
             )[0]
 
