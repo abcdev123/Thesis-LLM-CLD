@@ -18,10 +18,10 @@ from sklearn.metrics import accuracy_score
 # =====================================
 # Configuration
 # =====================================
-MODEL_ID   = "mistralai/Mistral-7B-Instruct-v0.2"
+MODEL_ID   = "mistralai/Mistral-Small-24B-Instruct-2501"
 DATA_PATH  = "src/Dataset_Gijs_prompts.xlsx"
 SEQ_LEN    = 2048     # ≤ 32768 for this model
-OUTPUT_DIR = "Mistral_LLM_7B_Instruct-v0.2_Qlora_finetuned_w_wrapping"
+OUTPUT_DIR = "Mistral-Small-24B-Instruct-2501_Qlora_finetuned_w_wrapping"
 
 torch.backends.cuda.matmul.allow_tf32 = True
 
