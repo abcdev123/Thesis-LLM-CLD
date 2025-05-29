@@ -130,7 +130,7 @@ def main():
     split = ds.train_test_split(test_size=0.2, seed=42)
 
     # 2) Tokenizer
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, use_fast=True)
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, use_fast=False, trust_remote_code=True)
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
     pad_id = tokenizer.pad_token_id
@@ -149,6 +149,7 @@ def main():
         quantization_config=bnb_cfg,
         device_map="auto",
         low_cpu_mem_usage=True,
+        trust_remote_code=True,
     )
 
     model = prepare_model_for_kbit_training(model)
