@@ -3,8 +3,7 @@ import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
 # ─── CONFIG ─────────────────────────────────────────────────────────────────────
-# MODEL_DIR      = "src/Mistral_LLM_7B_v0.1_Base_lora_finetuned/merged_fp16_7Bv0.1"
-MODEL_DIR      = "mistralai/Mistral-7B-v0.1"
+MODEL_DIR      = "mistralai/Mistral-7B-v0.1"            # base Mistral checkpoint
 DEVICE         = "cuda" if torch.cuda.is_available() else "cpu"
 DTYPE          = torch.float16 if DEVICE == "cuda" else torch.float32
 SEQ_LEN        = 1024
@@ -34,32 +33,37 @@ def load_model():
 # ─── GENERATION ─────────────────────────────────────────────────────────────────
 def generate_response(prompt: str, tokenizer, model) -> str:
     """
-    Generates a response from the base causal LM given a prompt.
+    Wraps the raw prompt in an Instruction/Response template, then generates.
     """
-    # Tokenize prompt (with special tokens)
+    # Build the wrapper
+    wrapper = (
+        "### Instruction:\n"
+        f"{prompt}\n"
+        "### Response:\n"
+    )
+
+    # Tokenize the wrapped prompt (includes BOS/EOS)
     enc = tokenizer(
-        prompt,
+        wrapper,
         return_tensors="pt",
         truncation=True,
         max_length=SEQ_LEN,
         padding=False,
         add_special_tokens=True,
-    )
-    input_ids = enc["input_ids"].to(DEVICE)
-    attention_mask = enc["attention_mask"].to(DEVICE)
+    ).to(DEVICE)
 
-    # Generate continuation
+    # Generate continuation, forcing full length
     with torch.no_grad():
         output_ids = model.generate(
-            input_ids=input_ids,
-            attention_mask=attention_mask,
+            input_ids=enc["input_ids"],
+            attention_mask=enc["attention_mask"],
             max_new_tokens=MAX_NEW_TOKENS,
-            eos_token_id=model.config.eos_token_id,
+            eos_token_id=None,                  # disable early stopping
             pad_token_id=tokenizer.pad_token_id,
         )
 
-    # Extract only the generated tokens
-    gen_ids = output_ids[0, input_ids.shape[-1]:].tolist()
+    # Slice off the prompt tokens and decode only the new ones
+    gen_ids = output_ids[0, enc["input_ids"].shape[-1]:].tolist()
     response = tokenizer.decode(gen_ids, skip_special_tokens=True)
     return response.strip()
 
@@ -79,6 +83,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
