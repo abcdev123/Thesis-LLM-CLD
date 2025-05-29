@@ -25,12 +25,13 @@ from sklearn.metrics import (
 # hf_logging.set_verbosity_error()
 
 # ─── CONFIGURATION ───────────────────────────────────────────────────────────────
-# BASE_MODEL    = "mistralai/Mistral-7B-Instruct-v0.2"
-BASE_MODEL      = "mistralai/Mistral-7B-v0.1"  # Base Mistral
-FINETUNED_MODEL = "src/Mistral_LLM_7B_v0.1_Base_lora_finetuned/merged_fp16_7Bv0.1"  # Path to your fine-tuned model
+BASE_MODEL    = "mistralai/Mistral-7B-Instruct-v0.2"
+# BASE_MODEL      = "mistralai/Mistral-7B-v0.1"  # Base Mistral
+# FINETUNED_MODEL = "src/Mistral_LLM_7B_v0.1_Base_lora_finetuned/merged_fp16_7Bv0.1"  # Path to your fine-tuned model
+FINETUNED_MODEL = "src/Mistral_LLM_7B_Instruct-v0.2_lora_finetuned_w_wrapping/merged_fp16"
 DATA_PATH       = "src/Dataset_Gijs_prompts.xlsx"
-OUTPUT_DIR      = "Evaluation_results_29-05-2025_lora-5"
-SEQ_LEN         = 1024
+OUTPUT_DIR      = "Evaluation_results_Instruct_7Bv0.2-29-05-2025"
+SEQ_LEN         = 2048
 MAX_NEW_TOKENS  = 100
 DEVICE          = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -61,25 +62,16 @@ def evaluate_model(model_name: str, tokenizer, test_ds: Dataset, debug: bool = F
         true_rel        = parse_relationship_from_output(true_completion)
 
         # ─── wrap in [INST] tags ────────────────────────────────────────────
-        # wrapped = f"<s>[INST] {prompt} [/INST] "
-        # wrapped = prompt
+        wrapped = f"<s>[INST] {prompt} [/INST]"
 
-        wrapper = (
-            "### Instruction:\n"
-            f"{prompt}\n"
-            "### Response:\n"
-        )
-
-        # ─── tokenize ONLY the wrapped prompt ───────────────────────────────
-        # encodings = tokenizer(
-        #     wrapped,
-        #     return_tensors="pt",
-        #     truncation=True,
-        #     padding=False,
-        # ).to(DEVICE)
+        # wrapper = (
+        #     "### Instruction:\n"
+        #     f"{prompt}\n"
+        #     "### Response:\n"
+        # )
 
         encodings = tokenizer(
-            wrapper,
+            wrapped,
             truncation=True,
             max_length=SEQ_LEN,
             padding=False,
