@@ -13,5 +13,5 @@ module load Anaconda3/2024.06-1
 
 
 # create the env in your project dir
-conda env update -f env.yml --prefix ./thesis_env
+conda env install -f env.yml --prefix ./thesis_env
 
