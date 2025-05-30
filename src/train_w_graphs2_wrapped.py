@@ -20,7 +20,7 @@ from sklearn.metrics import accuracy_score
 # =====================================
 MODEL_ID   = "Qwen/Qwen2.5-32B-Instruct"
 DATA_PATH  = "src/Dataset_Gijs_prompts.xlsx"
-SEQ_LEN    = 2048     # ≤ 32768 for this model
+SEQ_LEN    = 1300     # ≤ 32768 for this model
 OUTPUT_DIR = "Qwen/Qwen2.5-32B-Instruct_Qlora_finetuned_w_wrapping"
 
 torch.backends.cuda.matmul.allow_tf32 = True
@@ -185,7 +185,7 @@ def main():
         output_dir=OUTPUT_DIR,
         per_device_train_batch_size=1,
         per_device_eval_batch_size=1,
-        gradient_accumulation_steps=16,
+        gradient_accumulation_steps=32,
         num_train_epochs=3,
         evaluation_strategy="epoch",
         save_strategy="no",
