@@ -27,18 +27,18 @@ OUTPUT_DIR = "rombodawg/Rombos-LLM-V2.5-Qwen-32b_Qlora_finetuned_w_wrapping"
 torch.backends.cuda.matmul.allow_tf32 = True
 
 # ─── METRICS ─────────────────────────────────────────────────────────────────────
-def compute_metrics(eval_pred):
-    """
-    Compute token-level accuracy (ignoring labels == -100).
-    """
-    logits, labels = eval_pred
-    preds = logits.argmax(-1)
-    mask = labels != -100
-    acc = accuracy_score(
-        labels[mask].reshape(-1).cpu().numpy(),
-        preds[mask].reshape(-1).cpu().numpy()
-    )
-    return {"eval_accuracy": acc}
+# def compute_metrics(eval_pred):
+#     """
+#     Compute token-level accuracy (ignoring labels == -100).
+#     """
+#     logits, labels = eval_pred
+#     preds = logits.argmax(-1)
+#     mask = labels != -100
+#     acc = accuracy_score(
+#         labels[mask].reshape(-1).cpu().numpy(),
+#         preds[mask].reshape(-1).cpu().numpy()
+#     )
+#     return {"eval_accuracy": acc}
 
 # ─── PLOTTING ────────────────────────────────────────────────────────────────────
 def plot_training(trainer, output_dir):
@@ -46,8 +46,8 @@ def plot_training(trainer, output_dir):
     steps      = [l["step"]           for l in logs if "step" in l]
     train_loss = [l["loss"]           for l in logs if "loss" in l]
     eval_loss  = [l["eval_loss"]      for l in logs if "eval_loss" in l]
-    train_acc  = [l["accuracy"]       for l in logs if "accuracy" in l]
-    eval_acc   = [l["eval_accuracy"]  for l in logs if "eval_accuracy" in l]
+    # train_acc  = [l["accuracy"]       for l in logs if "accuracy" in l]
+    # eval_acc   = [l["eval_accuracy"]  for l in logs if "eval_accuracy" in l]
     lr         = [l["learning_rate"]  for l in logs if "learning_rate" in l]
 
     # Loss plot
@@ -65,20 +65,20 @@ def plot_training(trainer, output_dir):
     plt.tight_layout()
     plt.savefig(os.path.join(output_dir, "loss_plot.png"))
 
-    # Accuracy plot
-    plt.figure()
-    if train_acc:
-        plt.plot(steps[:len(train_acc)], train_acc, label="train_acc")
-    if eval_acc:
-        eval_steps = steps[1:1+len(eval_acc)]
-        plt.plot(eval_steps, eval_acc, label="eval_acc")
-    plt.xlabel("Step")
-    plt.ylabel("Accuracy")
-    plt.title("Training & Eval Accuracy")
-    plt.legend()
-    plt.grid(True)
-    plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, "accuracy_plot.png"))
+    # # Accuracy plot
+    # plt.figure()
+    # if train_acc:
+    #     plt.plot(steps[:len(train_acc)], train_acc, label="train_acc")
+    # if eval_acc:
+    #     eval_steps = steps[1:1+len(eval_acc)]
+    #     plt.plot(eval_steps, eval_acc, label="eval_acc")
+    # plt.xlabel("Step")
+    # plt.ylabel("Accuracy")
+    # plt.title("Training & Eval Accuracy")
+    # plt.legend()
+    # plt.grid(True)
+    # plt.tight_layout()
+    # plt.savefig(os.path.join(output_dir, "accuracy_plot.png"))
 
     # Learning rate plot
     if lr:
@@ -211,7 +211,7 @@ def main():
         eval_dataset=tok_ds["test"],
         data_collator=data_collator,
         tokenizer=tokenizer,
-        compute_metrics=compute_metrics,
+        # compute_metrics=compute_metrics,
     )
 
     # 10) Train
