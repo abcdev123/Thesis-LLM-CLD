@@ -21,7 +21,7 @@ from sklearn.metrics import accuracy_score
 MODEL_ID   = "rombodawg/Rombos-LLM-V2.5-Qwen-32b"
 DATA_PATH  = "src/Dataset_Gijs_prompts.xlsx"
 SEQ_LEN    = 1300     # ≤ 32768 for this model
-OUTPUT_DIR = "rombodawg/Rombos-LLM-V2.5-Qwen-32b_Qlora_finetuned_w_wrapping"
+OUTPUT_DIR = "rombodawg/Rombos-LLM-V2.5-Qwen-32b_lora_finetuned_w_wrapping"
 # OUTPUT_DIR = "rombodawg/Rombos-LLM-V2.5-Qwen-32b"
 
 torch.backends.cuda.matmul.allow_tf32 = True
@@ -137,23 +137,23 @@ def main():
     pad_id = tokenizer.pad_token_id
 
     # 3) Load & quantize instruct model
-    bnb_cfg = BitsAndBytesConfig(
-        load_in_4bit=True,
-        bnb_4bit_quant_type="nf4",
-        bnb_4bit_compute_dtype=torch.float16,
-        bnb_4bit_use_double_quant=True,
-    )
+    # bnb_cfg = BitsAndBytesConfig(
+    #     load_in_4bit=True,
+    #     bnb_4bit_quant_type="nf4",
+    #     bnb_4bit_compute_dtype=torch.float16,
+    #     bnb_4bit_use_double_quant=True,
+    # )
 
     # 4) Load model
     model = AutoModelForCausalLM.from_pretrained(
         MODEL_ID,
-        quantization_config=bnb_cfg,
+        # quantization_config=bnb_cfg,
         device_map="auto",
         low_cpu_mem_usage=True,
         trust_remote_code=True,
     )
 
-    model = prepare_model_for_kbit_training(model)
+    # model = prepare_model_for_kbit_training(model)
 
     # 5) LoRA setup
     lora_cfg = LoraConfig(
