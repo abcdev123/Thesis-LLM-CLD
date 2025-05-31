@@ -7,11 +7,12 @@ from transformers import (
 )
 
 # ─── CONFIG ─────────────────────────────────────────────────────────────────────
-MODEL_DIR      = "src/Mistral_LLM_7B_Instruct-v0.2_Qlora_finetuned/merged_fp16"
+# MODEL_DIR      = "src/Mistral_LLM_7B_Instruct-v0.2_Qlora_finetuned/merged_fp16"
+MODEL_DIR      = "src/rombodawg/Rombos-LLM-V2.5-Qwen-32b_Qlora_finetuned_w_wrapping" 
 USE_4BIT       = False   # set True if you want to load the 4-bit QLoRA checkpoint
 DEVICE         = "cuda" if torch.cuda.is_available() else "cpu"
 DTYPE          = torch.float16 if DEVICE == "cuda" else torch.float32
-SEQ_LEN        = 2048
+SEQ_LEN        = 1300
 MAX_NEW_TOKENS = 100
 
 # ─── MODEL LOADING ───────────────────────────────────────────────────────────────
