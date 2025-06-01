@@ -18,12 +18,12 @@ from sklearn.metrics import accuracy_score
 # =====================================
 # Configuration
 # =====================================
-# MODEL_ID   = "rombodawg/Rombos-LLM-V2.5-Qwen-32b"
-MODEL_ID   = "Qwen/Qwen2.5-14B-Instruct-1M"
+MODEL_ID   = "rombodawg/Rombos-LLM-V2.5-Qwen-32b"
+# MODEL_ID   = "Qwen/Qwen2.5-14B-Instruct-1M"
 DATA_PATH  = "src/Dataset_Gijs_prompts.xlsx"
 SEQ_LEN    = 1300     # ≤ 32768 for this model
-# OUTPUT_DIR = "Rombos-LLM-V2.5-Qwen-32b_lora_finetuned_w_wrapping"
-OUTPUT_DIR = "Qwen2.5-14B-Instruct_lora_finetuned_w_wrapping"
+OUTPUT_DIR = "Rombos-LLM-V2.5-Qwen-32b_lora_finetuned_w_wrapping"
+# OUTPUT_DIR = "Qwen2.5-14B-Instruct_lora_finetuned_w_wrapping"
 
 torch.backends.cuda.matmul.allow_tf32 = True
 
