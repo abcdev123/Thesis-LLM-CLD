@@ -18,27 +18,14 @@ from sklearn.metrics import accuracy_score
 # =====================================
 # Configuration
 # =====================================
-MODEL_ID   = "rombodawg/Rombos-LLM-V2.5-Qwen-32b"
+# MODEL_ID   = "rombodawg/Rombos-LLM-V2.5-Qwen-32b"
+MODEL_ID   = "Qwen/Qwen2.5-14B-Instruct-1M"
 DATA_PATH  = "src/Dataset_Gijs_prompts.xlsx"
 SEQ_LEN    = 1300     # ≤ 32768 for this model
-OUTPUT_DIR = "rombodawg/Rombos-LLM-V2.5-Qwen-32b_lora_finetuned_w_wrapping"
-# OUTPUT_DIR = "rombodawg/Rombos-LLM-V2.5-Qwen-32b"
+# OUTPUT_DIR = "Rombos-LLM-V2.5-Qwen-32b_lora_finetuned_w_wrapping"
+OUTPUT_DIR = "Qwen2.5-14B-Instruct_lora_finetuned_w_wrapping"
 
 torch.backends.cuda.matmul.allow_tf32 = True
-
-# ─── METRICS ─────────────────────────────────────────────────────────────────────
-# def compute_metrics(eval_pred):
-#     """
-#     Compute token-level accuracy (ignoring labels == -100).
-#     """
-#     logits, labels = eval_pred
-#     preds = logits.argmax(-1)
-#     mask = labels != -100
-#     acc = accuracy_score(
-#         labels[mask].reshape(-1).cpu().numpy(),
-#         preds[mask].reshape(-1).cpu().numpy()
-#     )
-#     return {"eval_accuracy": acc}
 
 # ─── PLOTTING ────────────────────────────────────────────────────────────────────
 def plot_training(trainer, output_dir):
@@ -64,21 +51,6 @@ def plot_training(trainer, output_dir):
     plt.grid(True)
     plt.tight_layout()
     plt.savefig(os.path.join(output_dir, "loss_plot.png"))
-
-    # # Accuracy plot
-    # plt.figure()
-    # if train_acc:
-    #     plt.plot(steps[:len(train_acc)], train_acc, label="train_acc")
-    # if eval_acc:
-    #     eval_steps = steps[1:1+len(eval_acc)]
-    #     plt.plot(eval_steps, eval_acc, label="eval_acc")
-    # plt.xlabel("Step")
-    # plt.ylabel("Accuracy")
-    # plt.title("Training & Eval Accuracy")
-    # plt.legend()
-    # plt.grid(True)
-    # plt.tight_layout()
-    # plt.savefig(os.path.join(output_dir, "accuracy_plot.png"))
 
     # Learning rate plot
     if lr:
@@ -199,8 +171,8 @@ def main():
         learning_rate=2e-4,
         optim="adamw_torch",
         weight_decay=0.01,
-        load_best_model_at_end=False,
-        report_to=[],
+        # load_best_model_at_end=False,
+        # report_to=[],
     )
 
     # 9) Trainer
