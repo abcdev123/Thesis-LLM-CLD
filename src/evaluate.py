@@ -51,7 +51,7 @@ def parse_relationship_from_output(text: str) -> str:
 # ─── EVALUATION FUNCTION ─────────────────────────────────────────────────────────
 def evaluate_model(model_name: str, tokenizer, test_ds: Dataset, debug: bool = False):
     print(f"\nLoading model from {model_name}…")
-    model = AutoModelForCausalLM.from_pretrained(model_name).to(DEVICE)
+    model = AutoModelForCausalLM.from_pretrained(model_name, device_map="auto", trust_remote_code=True, low_cpu_mem_usage=True,)
     if model.config.pad_token_id is None:
         model.config.pad_token_id = tokenizer.pad_token_id
     model.eval()
