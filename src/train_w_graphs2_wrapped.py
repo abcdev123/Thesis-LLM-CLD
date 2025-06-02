@@ -18,12 +18,12 @@ from sklearn.metrics import accuracy_score
 # =====================================
 # Configuration
 # =====================================
-# MODEL_ID   = "rombodawg/Rombos-LLM-V2.5-Qwen-32b"
-MODEL_ID   = "Qwen/Qwen2.5-14B-Instruct-1M"
+MODEL_ID   = "rombodawg/Rombos-LLM-V2.5-Qwen-32b"
+# MODEL_ID   = "Qwen/Qwen2.5-14B-Instruct-1M"
 DATA_PATH  = "src/Dataset_Gijs_prompts.xlsx"
 SEQ_LEN    = 1300     # ≤ 32768 for this model
-# OUTPUT_DIR = "Rombos-LLM-V2.5-Qwen-32b_lora_finetuned_w_wrapping"
-OUTPUT_DIR = "Qwen2.5-14B-Instruct_Qlora_finetuned_w_wrapping"
+OUTPUT_DIR = "Rombos-LLM-V2.5-Qwen-32b_lora_finetuned_w_wrapping"
+# OUTPUT_DIR = "Qwen2.5-14B-Instruct_Qlora_finetuned_w_wrapping"
 
 torch.backends.cuda.matmul.allow_tf32 = True
 
@@ -109,17 +109,17 @@ def main():
     pad_id = tokenizer.pad_token_id
 
     # 3) Load & quantize instruct model
-    bnb_cfg = BitsAndBytesConfig(
-        load_in_4bit=True,
-        bnb_4bit_quant_type="nf4",
-        bnb_4bit_compute_dtype=torch.float16,
-        bnb_4bit_use_double_quant=True,
-    )
+    # bnb_cfg = BitsAndBytesConfig(
+    #     load_in_4bit=True,
+    #     bnb_4bit_quant_type="nf4",
+    #     bnb_4bit_compute_dtype=torch.float16,
+    #     bnb_4bit_use_double_quant=True,
+    # )
 
     # 4) Load model
     model = AutoModelForCausalLM.from_pretrained(
         MODEL_ID,
-        quantization_config=bnb_cfg,
+        # quantization_config=bnb_cfg,
         device_map="auto",
         low_cpu_mem_usage=True,
         trust_remote_code=True,
@@ -171,8 +171,6 @@ def main():
         learning_rate=2e-4,
         optim="adamw_torch",
         weight_decay=0.01,
-        # load_best_model_at_end=False,
-        # report_to=[],
     )
 
     # 9) Trainer
