@@ -2,10 +2,10 @@
 
 #SBATCH -J test_inference                  # job name
 #SBATCH --partition=gpu_h100               # partition to use
-#SBATCH --gres=gpu:1                       # request 1 GPU
+#SBATCH --gres=gpu:2                       # request 2 GPUs
 #SBATCH --ntasks=1                         # number of tasks (processes)
 #SBATCH --cpus-per-task=4                  # CPU cores per task
-#SBATCH --mem=32G                          # total memory
+#SBATCH --mem=64G                          # total memory
 #SBATCH --time=01:00:00                    # max runtime (HH:MM:SS)
 #SBATCH -o jobs/logs/test_inference_%j.log # STDOUT log file
 

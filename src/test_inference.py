@@ -10,7 +10,7 @@ MODEL_DIR      = "src/Qwen2.5-14B-Instruct_lora_finetuned_w_wrapping/merged_fp16
 # MODEL_DIR      = "src/Rombos-LLM-V2.5-Qwen-32b_lora_finetuned_w_wrapping/merged_fp16"
 DEVICE         = "cuda" if torch.cuda.is_available() else "cpu"
 DTYPE          = torch.float16 if DEVICE == "cuda" else torch.float32
-SEQ_LEN        = 2048
+SEQ_LEN        = 1300
 MAX_NEW_TOKENS = 100
 
 # ─── MODEL LOADING ───────────────────────────────────────────────────────────────
@@ -23,6 +23,7 @@ def load_model():
     model = AutoModelForCausalLM.from_pretrained(
         MODEL_DIR,
         torch_dtype=DTYPE,
+        device_map="auto",
         low_cpu_mem_usage=(DEVICE == "cpu"),
     ).to(DEVICE)
 
