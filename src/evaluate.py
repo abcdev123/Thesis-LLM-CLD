@@ -31,7 +31,7 @@ BASE_MODEL      = "Qwen/Qwen2.5-14B-Instruct-1M"
 # FINETUNED_MODEL = "src/Mistral_LLM_7B_v0.1_Base_lora_finetuned/merged_fp16_7Bv0.1"  # Path to your fine-tuned model
 FINETUNED_MODEL = "src/Qwen2.5-14B-Instruct_lora_finetuned_w_wrapping/merged_fp16"
 DATA_PATH       = "src/Dataset_Gijs_prompts.xlsx"
-OUTPUT_DIR      = "Evaluation_results_Instruct_7Bv0.2-29-05-2025"
+OUTPUT_DIR      = "Evaluation_results_Qwen2.5-14B-Instruct-02-06-2025"
 SEQ_LEN         = 1300
 MAX_NEW_TOKENS  = 150
 DEVICE          = "cuda" if torch.cuda.is_available() else "cpu"
@@ -51,7 +51,7 @@ def parse_relationship_from_output(text: str) -> str:
 # ─── EVALUATION FUNCTION ─────────────────────────────────────────────────────────
 def evaluate_model(model_name: str, tokenizer, test_ds: Dataset, debug: bool = False):
     print(f"\nLoading model from {model_name}…")
-    model = AutoModelForCausalLM.from_pretrained(model_name, device_map="auto", trust_remote_code=True, low_cpu_mem_usage=True,)
+    model = AutoModelForCausalLM.from_pretrained(model_name, device_map="auto", trust_remote_code=True)
     if model.config.pad_token_id is None:
         model.config.pad_token_id = tokenizer.pad_token_id
     model.eval()
