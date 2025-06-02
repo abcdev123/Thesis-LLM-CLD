@@ -25,10 +25,11 @@ from sklearn.metrics import (
 # hf_logging.set_verbosity_error()
 
 # ─── CONFIGURATION ───────────────────────────────────────────────────────────────
-BASE_MODEL    = "mistralai/Mistral-7B-Instruct-v0.2"
+# BASE_MODEL    = "mistralai/Mistral-7B-Instruct-v0.2"
+BASE_MODEL      = "Qwen/Qwen2.5-14B-Instruct-1M"
 # BASE_MODEL      = "mistralai/Mistral-7B-v0.1"  # Base Mistral
 # FINETUNED_MODEL = "src/Mistral_LLM_7B_v0.1_Base_lora_finetuned/merged_fp16_7Bv0.1"  # Path to your fine-tuned model
-FINETUNED_MODEL = "src/Mistral_LLM_7B_Instruct-v0.2_lora_finetuned_w_wrapping/merged_fp16"
+FINETUNED_MODEL = "src/Qwen2.5-14B-Instruct_lora_finetuned_w_wrapping/merged_fp16"
 DATA_PATH       = "src/Dataset_Gijs_prompts.xlsx"
 OUTPUT_DIR      = "Evaluation_results_Instruct_7Bv0.2-29-05-2025"
 SEQ_LEN         = 1300
