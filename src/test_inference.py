@@ -25,7 +25,7 @@ def load_model():
         torch_dtype=DTYPE,
         device_map="auto",
         low_cpu_mem_usage=True,
-    ).to(DEVICE)
+    )
 
     # Ensure pad token is defined
     if tokenizer.pad_token_id is None:
