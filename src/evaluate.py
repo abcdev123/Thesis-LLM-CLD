@@ -31,8 +31,8 @@ BASE_MODEL    = "mistralai/Mistral-7B-Instruct-v0.2"
 FINETUNED_MODEL = "src/Mistral_LLM_7B_Instruct-v0.2_lora_finetuned_w_wrapping/merged_fp16"
 DATA_PATH       = "src/Dataset_Gijs_prompts.xlsx"
 OUTPUT_DIR      = "Evaluation_results_Instruct_7Bv0.2-29-05-2025"
-SEQ_LEN         = 2048
-MAX_NEW_TOKENS  = 100
+SEQ_LEN         = 1300
+MAX_NEW_TOKENS  = 150
 DEVICE          = "cuda" if torch.cuda.is_available() else "cpu"
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
