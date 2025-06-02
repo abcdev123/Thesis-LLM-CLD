@@ -20,11 +20,13 @@ from sklearn.metrics import (
 
 # ─── CONFIGURATION ───────────────────────────────────────────────────────────────
 # BASE_MODEL      = "mistralai/Mistral-7B-Instruct-v0.2"
-BASE_MODEL      = "rombodawg/Rombos-LLM-V2.5-Qwen-32b"
+# BASE_MODEL      = "rombodawg/Rombos-LLM-V2.5-Qwen-32b"
+BASE_MODEL      = "Qwen/Qwen2.5-14B-Instruct-1M"
 # FINETUNED_MODEL = "src/Mistral_LLM_7B_Instruct-v0.2_Qlora_finetuned/merged_fp16"
-FINETUNED_MODEL = "src/rombodawg/Rombos-LLM-V2.5-Qwen-32b_Qlora_finetuned_w_wrapping/merged_fp16" 
+FINETUNED_MODEL = "src/Qwen2.5-14B-Instruct_Qlora_finetuned_w_wrapping/merged_fp16" 
 DATA_PATH       = "src/Dataset_Gijs_prompts.xlsx"
-OUTPUT_DIR      = "Evaluation_results_Rombos-LLM-V2.5-Qwen-32b_Qlora__w_wrapping_31-05-2025"
+# OUTPUT_DIR      = "Evaluation_results_Rombos-LLM-V2.5-Qwen-32b_Qlora__w_wrapping_31-05-2025"
+OUTPUT_DIR      = "Evaluation_results_Qwen2.5-14B-Instruct-02-06-2025_Qlora"
 SEQ_LEN         = 1300
 MAX_NEW_TOKENS  = 100
 DEVICE          = "cuda" if torch.cuda.is_available() else "cpu"
