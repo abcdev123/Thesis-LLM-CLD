@@ -24,7 +24,7 @@ def load_model():
         MODEL_DIR,
         torch_dtype=DTYPE,
         device_map="auto",
-        low_cpu_mem_usage=(DEVICE == "cpu"),
+        low_cpu_mem_usage=True,
     ).to(DEVICE)
 
     # Ensure pad token is defined
