@@ -127,7 +127,7 @@ def main():
 
     # run eval for both
     # for label, model_name in [("base", BASE_MODEL), ("lora", FINETUNED_MODEL)]:
-    for label, model_name in [("lora", FINETUNED_MODEL)]:
+    for label, model_name in [("base", BASE_MODEL)]:
 
         print(f"\n>> Evaluating {label} model")
         trues, preds, records = evaluate_model(
