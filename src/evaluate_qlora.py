@@ -124,7 +124,7 @@ def main():
     test_ds = ds.train_test_split(test_size=0.2, seed=42)["test"]
 
     # load tokenizer (shared for both base & fine-tuned)
-    tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL, use_fast=True)
+    tokenizer = AutoTokenizer.from_pretrained(FINETUNED_MODEL, use_fast=True)
     tokenizer.padding_side = "right"
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
