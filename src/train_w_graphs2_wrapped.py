@@ -22,7 +22,7 @@ from sklearn.metrics import accuracy_score
 MODEL_ID   = "Qwen/Qwen2.5-14B-Instruct-1M"
 # MODEL_ID   = "rombodawg/Rombos-LLM-V2.5-Qwen-32b"
 # DATA_PATH  = "src/Dataset_Gijs_prompts.xlsx"
-DATA_PATH  = "Dataset_Gijs_prompts_with_reasoning.xlsx"
+DATA_PATH  = "src/Dataset_Gijs_prompts_with_reasoning.xlsx"
 SEQ_LEN    = 2000     # ≤ 32768 for this model
 # OUTPUT_DIR = "Mistral-7B-Instruct-v0.2_Qlora_finetuned_w_wrapping-03-06-2025"
 OUTPUT_DIR = "Qwen2.5-14B-Instruct-1M_Qlora_finetuned_w_wrapping_and_reasoning_traces-09-06-2025"
