@@ -120,7 +120,7 @@ def main():
     ds    = Dataset.from_pandas(df[["prompt","completion"]]).shuffle(seed=42)
     test_dataset  = ds.train_test_split(test_size=0.2, seed=42)["test"]
 
-    test_dataset = test_dataset[0:3] # limit to 3 samples for testing
+    test_dataset  = test_dataset.select(range(3)) # limit to 3 samples for testing
 
     # prepare tokenizer
     tokenizer = AutoTokenizer.from_pretrained(FINETUNED_MODEL, use_fast=True)
