@@ -31,9 +31,9 @@ from sklearn.metrics import (
 # FINETUNED_MODEL = "src/Mistral_LLM_7B_v0.1_Base_lora_finetuned/merged_fp16_7Bv0.1"  # Path to your fine-tuned model
 FINETUNED_MODEL = "src/Qwen2.5-14B-Instruct-1M_Qlora_finetuned_w_wrapping_and_reasoning_traces-09-06-2025/merged_fp16"
 DATA_PATH       = "src/Dataset_Gijs_prompts.xlsx"
-OUTPUT_DIR      = "Evaluation_results_Qwen2.5-14B-Instruct-1M_lora_finetuned-10-06-2025"
-SEQ_LEN         = 2000
-MAX_NEW_TOKENS  = 10000
+OUTPUT_DIR      = "Evaluation_results_Qwen2.5-14B-Instruct-1M_lora_finetuned-10-06-2025-second_run"
+SEQ_LEN         = 1300
+MAX_NEW_TOKENS  = 1000
 DEVICE          = "cuda" if torch.cuda.is_available() else "cpu"
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
