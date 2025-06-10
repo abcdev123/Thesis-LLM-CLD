@@ -33,9 +33,9 @@ from sklearn.metrics import (
 FINETUNED_MODEL = "src/Mistral-7B-Instruct-v0.2_lora_finetuned_w_wrapping_and_reasoning_traces-10-06-2025/merged_fp16"
 DATA_PATH       = "src/Dataset_Gijs_prompts.xlsx"
 # OUTPUT_DIR      = "Evaluation_results_Qwen2.5-14B-Instruct-1M_lora_finetuned-10-06-2025-second_run"
-OUTPUT_DIR      = "Evaluation_results_Mistral-7B-Instruct-v0.2_lora_finetuned_w_wrapping_and_reasoning_traces-10-06-2025"
+OUTPUT_DIR      = "Evaluation_results_Mistral-7B-Instruct-v0.2_lora_finetuned_w_wrapping_and_reasoning_traces-11-06-2025"
 SEQ_LEN         = 1300
-MAX_NEW_TOKENS  = 1000
+MAX_NEW_TOKENS  = 700
 DEVICE          = "cuda" if torch.cuda.is_available() else "cpu"
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -120,7 +120,7 @@ def main():
     ds    = Dataset.from_pandas(df[["prompt","completion"]]).shuffle(seed=42)
     test_dataset  = ds.train_test_split(test_size=0.2, seed=42)["test"]
 
-    test_dataset  = test_dataset.select(range(3)) # limit to 3 samples for testing
+    # test_dataset  = test_dataset.select(range(3)) # limit to 3 samples for testing
 
     # prepare tokenizer
     tokenizer = AutoTokenizer.from_pretrained(FINETUNED_MODEL, use_fast=True)
