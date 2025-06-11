@@ -105,7 +105,6 @@ def tokenize_instruct(examples, tokenizer, pad_id):
     return enc
 
 
-
 def parse_relationship_from_output(text: str) -> str:
     """
     Regex out exactly the value behind "relationship":"...".
@@ -113,7 +112,6 @@ def parse_relationship_from_output(text: str) -> str:
     """
     m = re.search(r'[Rr]elationship"\s*:\s*"([^"]+)"', text)
     return m.group(1).strip().lower() if m else ""
-
 
 
 def evaluate_model(model_name: str, tokenizer, test_ds: Dataset, debug: bool = False):
@@ -129,9 +127,7 @@ def evaluate_model(model_name: str, tokenizer, test_ds: Dataset, debug: bool = F
         true_completion = ex["completion"]
         true_rel        = parse_relationship_from_output(true_completion)
 
-        # ─── wrap in [INST] tags ────────────────────────────────────────────
         wrapped = f"<s>[INST] {prompt} [/INST]"
-
         encodings = tokenizer(
             wrapped,
             truncation=True,
@@ -141,17 +137,14 @@ def evaluate_model(model_name: str, tokenizer, test_ds: Dataset, debug: bool = F
             return_tensors="pt",
         ).to(model.device)
 
-        # ─── generate exactly MAX_NEW_TOKENS (disable early EOS) ────────────
         with torch.no_grad():
             ids = model.generate(
                 **encodings,
                 max_new_tokens=MAX_NEW_TOKENS,
-                # eos_token_id=None,
                 eos_token_id=tokenizer.eos_token_id,
                 pad_token_id=tokenizer.pad_token_id,
             )[0]
 
-        # ─── slice off prompt tokens to get only the model’s output ────────
         prompt_len  = encodings["input_ids"].shape[-1]
         new_tokens  = ids[prompt_len:].tolist()
         raw_output  = tokenizer.decode(new_tokens, skip_special_tokens=True).strip()
@@ -172,18 +165,18 @@ def evaluate_model(model_name: str, tokenizer, test_ds: Dataset, debug: bool = F
 
     return trues, preds, records
 
-
 # ─── MAIN ────────────────────────────────────────────────────────────────────────
 def main(job_id):
-
     print(f"Starting job {job_id}...")
 
     base_path = f"data/{time.strftime('/%Y/%m/%d')}/{job_id}/"
     os.makedirs(base_path, exist_ok=True)
-
-    # OUTPUT_DIR = f"{base_path}{OUTPUT_DIR}"
-
     full_output_dir = os.path.join(base_path, OUTPUT_DIR)
+
+    # Bepaal SLURM array-task en totaal aantal
+    task_id    = int(os.environ.get("SLURM_ARRAY_TASK_ID", 0))
+    task_count = int(os.environ.get("SLURM_ARRAY_TASK_COUNT", 1))
+    print(f"Task {task_id+1}/{task_count} gestart")
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print("Running on:", device)
@@ -192,7 +185,6 @@ def main(job_id):
     df = pd.read_excel(DATA_PATH).dropna(subset=["prompt","completion"])
     ds = Dataset.from_pandas(df[["prompt","completion"]]).shuffle()
     split = ds.train_test_split(test_size=0.2)
-    
 
     # 2) Tokenizer
     tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, use_fast=True, trust_remote_code=True)
@@ -200,24 +192,13 @@ def main(job_id):
         tokenizer.pad_token = tokenizer.eos_token
     pad_id = tokenizer.pad_token_id
 
-    # 3) Load & quantize instruct model
-    # bnb_cfg = BitsAndBytesConfig(
-    #     load_in_4bit=True,
-    #     bnb_4bit_quant_type="nf4",
-    #     bnb_4bit_compute_dtype=torch.float16,
-    #     bnb_4bit_use_double_quant=True,
-    # )
-
-    # 4) Load model
+    # 3) Load model
     model = AutoModelForCausalLM.from_pretrained(
         MODEL_ID,
-        # quantization_config=bnb_cfg,
         device_map="auto",
         low_cpu_mem_usage=True,
         trust_remote_code=True,
     )
-
-    # model = prepare_model_for_kbit_training(model)
 
     # 5) LoRA setup
     lora_cfg = LoraConfig(
@@ -273,46 +254,42 @@ def main(job_id):
         eval_dataset=tok_ds["test"],
         data_collator=data_collator,
         tokenizer=tokenizer,
-        # compute_metrics=compute_metrics,
     )
-
+  
     # 10) Train
     trainer.train()
 
-    # 11) Plots & save
+    # 11) Plots & save metrics
     os.makedirs(full_output_dir, exist_ok=True)
     plot_training(trainer, full_output_dir)
 
-    # 12) Save adapters & merged
-    model.save_pretrained(f"{full_output_dir}/lora_adapter")
-    tokenizer.save_pretrained(f"{full_output_dir}/lora_adapter")
-    merged = model.merge_and_unload()
-    merged.save_pretrained(f"{full_output_dir}/merged_fp16")
-    tokenizer.save_pretrained(f"{full_output_dir}/merged_fp16")
-
+    # 12) Conditionally save modellen
+    if task_id == task_count - 1:
+        print("Laatste taak: saven modellen.")
+        # alleen de laatste taak schrijft weg
+        model.save_pretrained(f"{full_output_dir}/lora_adapter")
+        tokenizer.save_pretrained(f"{full_output_dir}/lora_adapter")
+        merged = model.merge_and_unload()
+        merged.save_pretrained(f"{full_output_dir}/merged_fp16")
+        tokenizer.save_pretrained(f"{full_output_dir}/merged_fp16")
+    else:
+        print(f"Taak {task_id}: save overgeslagen.")
 
     # ─── EVALUATION ──────────────────────────────────────────────────────────────────
-
-    # initialise evaluation variables
     test_dataset  = split["test"]
     FINETUNED_MODEL = f"{full_output_dir}/merged_fp16"
 
-    # prepare tokenizer
     evaltokenizer = AutoTokenizer.from_pretrained(FINETUNED_MODEL, use_fast=True)
-    # tokenizer.padding_side = "left"
     evaltokenizer.padding_side = "right"
     if evaltokenizer.pad_token is None: 
         evaltokenizer.pad_token = evaltokenizer.eos_token
 
-    # run eval for both
     for label, model_name in [("base", MODEL_ID), ("lora", FINETUNED_MODEL)]:
-
         print(f"\n>> Evaluating {label} model")
         trues, preds, records = evaluate_model(
             model_name, evaltokenizer, test_dataset, debug=(label=="lora")
         )
 
-        # compute metrics
         acc         = accuracy_score(trues, preds)
         prec        = precision_score(trues, preds, average="weighted", zero_division=0)
         rec         = recall_score(trues, preds, average="weighted", zero_division=0)
@@ -323,16 +300,15 @@ def main(job_id):
         labels      = sorted(l for l in ["positive","negative","none"] if l in trues)
         cm          = confusion_matrix(trues, preds, labels=labels)
 
-        # build & write Excel
         df_rec   = pd.DataFrame.from_records(records)
-        df_met   = pd.DataFrame([{
-            "accuracy":  acc,
-            "precision": prec,
-            "recall":    rec,
-            "f1":        f1,
-            "n_samples": len(trues),
-            "job_id":    job_id,
-            "label":     label,
+        df_met   = pd.DataFrame([{\
+            "accuracy":  acc,\
+            "precision": prec,\
+            "recall":    rec,\
+            "f1":        f1,\
+            "n_samples": len(trues),\
+            "job_id":    job_id,\
+            "label":     label,\
         }])
         df_rep   = pd.DataFrame(report_dict).transpose()
         df_cm    = pd.DataFrame(cm, index=labels, columns=labels)
@@ -348,8 +324,6 @@ def main(job_id):
 if __name__ == "__main__":
     import sys
     import uuid
-
-
 
     job_id = sys.argv[1] if len(sys.argv) > 1 else uuid.uuid4()
     print(f"Running job with ID: {job_id}")
