@@ -1,5 +1,4 @@
 #!/bin/bash
-
 #SBATCH -J llm_train
 #SBATCH --partition=gpu_h100
 #SBATCH --gres=gpu:2
@@ -8,22 +7,19 @@
 #SBATCH --mem=64G
 #SBATCH --mail-user=gijs.schouten@student.uva.nl
 #SBATCH --mail-type=ALL
-#SBATCH --time=24:00:00       # 24-hour wall clock—adjust as needed
-#SBATCH -o jobs/logs/train_array_%j.log
+#SBATCH --time=24:00:00
+#SBATCH --array=1-30
+#SBATCH -o jobs/logs/train_array_%A_%a.log
 
 module purge
 module load 2024
 module load Anaconda3/2024.06-1
 
-# initialize conda in this shell
-# eval "$(conda shell.bash hook)"
+# ✱ REQUIRED to make `conda activate` work inside sbatch scripts
+eval "$(conda shell.bash hook)"
 
-# load CUDA and Conda (if needed)
-# module load cuda
 cd $HOME/Thesis-LLM-CLD
-
-# activate the env you created
 conda activate ./thesis_env
 
-# run the training script
-./thesis_env/bin/python src/train_array.py %A_%a
+# pass the array index into your python script
+./thesis_env/bin/python src/train_array.py $SLURM_ARRAY_TASK_ID
