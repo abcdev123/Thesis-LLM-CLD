@@ -181,7 +181,9 @@ def main(job_id):
     base_path = f"data/{time.strftime('/%Y/%m/%d')}/{job_id}/"
     os.makedirs(base_path, exist_ok=True)
 
-    OUTPUT_DIR = f"{base_path}{OUTPUT_DIR}"
+    # OUTPUT_DIR = f"{base_path}{OUTPUT_DIR}"
+
+    full_output_dir = os.path.join(base_path, OUTPUT_DIR)
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print("Running on:", device)
@@ -245,7 +247,7 @@ def main(job_id):
 
     # 8) Training args
     training_args = TrainingArguments(
-        output_dir=OUTPUT_DIR,
+        output_dir=full_output_dir,
         per_device_train_batch_size=1,
         per_device_eval_batch_size=1,
         gradient_accumulation_steps=32,
@@ -278,22 +280,22 @@ def main(job_id):
     trainer.train()
 
     # 11) Plots & save
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
-    plot_training(trainer, OUTPUT_DIR)
+    os.makedirs(full_output_dir, exist_ok=True)
+    plot_training(trainer, full_output_dir)
 
     # 12) Save adapters & merged
-    model.save_pretrained(f"{OUTPUT_DIR}/lora_adapter")
-    tokenizer.save_pretrained(f"{OUTPUT_DIR}/lora_adapter")
+    model.save_pretrained(f"{full_output_dir}/lora_adapter")
+    tokenizer.save_pretrained(f"{full_output_dir}/lora_adapter")
     merged = model.merge_and_unload()
-    merged.save_pretrained(f"{OUTPUT_DIR}/merged_fp16")
-    tokenizer.save_pretrained(f"{OUTPUT_DIR}/merged_fp16")
+    merged.save_pretrained(f"{full_output_dir}/merged_fp16")
+    tokenizer.save_pretrained(f"{full_output_dir}/merged_fp16")
 
 
     # ─── EVALUATION ──────────────────────────────────────────────────────────────────
 
     # initialise evaluation variables
     test_dataset  = split["test"]
-    FINETUNED_MODEL = f"{OUTPUT_DIR}/merged_fp16"
+    FINETUNED_MODEL = f"{full_output_dir}/merged_fp16"
 
     # prepare tokenizer
     evaltokenizer = AutoTokenizer.from_pretrained(FINETUNED_MODEL, use_fast=True)
@@ -335,7 +337,7 @@ def main(job_id):
         df_rep   = pd.DataFrame(report_dict).transpose()
         df_cm    = pd.DataFrame(cm, index=labels, columns=labels)
 
-        out_path = os.path.join(OUTPUT_DIR, f"{label}_results.xlsx")
+        out_path = os.path.join(full_output_dir, f"{label}_results.xlsx")
         with pd.ExcelWriter(out_path) as writer:
             df_rec.to_excel(writer, sheet_name="per_example", index=False)
             df_met.to_excel(writer, sheet_name="metrics",      index=False)
@@ -346,6 +348,8 @@ def main(job_id):
 if __name__ == "__main__":
     import sys
     import uuid
+
+
 
     job_id = sys.argv[1] if len(sys.argv) > 1 else uuid.uuid4()
     print(f"Running job with ID: {job_id}")
