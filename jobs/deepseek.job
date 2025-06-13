@@ -1,0 +1,24 @@
+#!/bin/bash
+#SBATCH --job-name=deepseek_smoke         # job name
+#SBATCH --output=logs/deepseek_%j.out     # STDOUT (%j = jobid)
+#SBATCH --error=logs/deepseek_%j.err      # STDERR
+#SBATCH --time=48:00:00                   # max runtime (HH:MM:SS)
+#SBATCH --nodes=1                         # 1 node
+#SBATCH --ntasks-per-node=1               # 1 task per node
+#SBATCH --cpus-per-task=4                 # adjust as needed
+#SBATCH --mem=16G                         # RAM
+##SBATCH --gres=gpu:1                     # uncomment if you need a GPU
+##SBATCH --partition=gpu                  # uncomment/use correct partition if GPU job
+
+# — load your Python environment —
+module load Anaconda3/2021.05             # or whichever module you use
+source activate deepseek-env              # your conda/env name
+
+# — go to your project directory —
+cd $HOME/path/to/your/project
+
+# — export your API key from the .env file —
+export $(grep -v '^#' .env | xargs)
+
+# — run the DeepSeek‐Reasoner script —
+./thesis_env/bin/python deepseek-r1-0528_reasoning.py
