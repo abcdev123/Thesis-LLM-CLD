@@ -7,8 +7,10 @@
 #SBATCH --ntasks-per-node=1               # 1 task per node
 #SBATCH --cpus-per-task=4                 # adjust as needed
 #SBATCH --mem=16G                         # RAM
-##SBATCH --gres=gpu:1                     # uncomment if you need a GPU
-##SBATCH --partition=gpu                  # uncomment/use correct partition if GPU job
+#SBATCH --gres=gpu:1                        # uncomment if you need a GPU
+#SBATCH --partition=gpu_h100                # uncomment/use correct partition if GPU job
+#SBATCH --mail-user=gijs.schouten@student.uva.nl
+#SBATCH --mail-type=ALL
 
 # — load your Python environment —
 module load Anaconda3/2021.05             # or whichever module you use
