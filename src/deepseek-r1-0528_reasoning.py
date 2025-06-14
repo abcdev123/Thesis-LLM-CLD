@@ -25,7 +25,7 @@ MODEL        = "deepseek-reasoner"
 TEMPERATURE  = 0.3
 MAX_TOKENS   = 2000
 
-DATA_IN   = "Dataset_Gijs_prompts_w_mediators_and_context.xlsx"
+DATA_IN   = "src/Dataset_Gijs_prompts_w_mediators_and_context.xlsx"
 DATA_OUT  = "Dataset_Gijs_prompts_with_reasoning_and_mediators_deepseekR1_distilled.xlsx"
 SAMPLE_N  = None            # None → full run
 
