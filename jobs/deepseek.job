@@ -27,4 +27,4 @@ conda activate ./thesis_env
 export $(grep -v '^#' .env | xargs)
 
 # — run the DeepSeek‐Reasoner script —
-./thesis_env/bin/python deepseek-r1-0528_reasoning.py
+./thesis_env/bin/python src/deepseek-r1-0528_reasoning.py
