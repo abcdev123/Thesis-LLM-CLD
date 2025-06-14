@@ -1,30 +1,42 @@
 #!/bin/bash
-#SBATCH --job-name=deepseek_smoke         # job name
-#SBATCH --output=logs/deepseek_%j.out     # STDOUT (%j = jobid)
-#SBATCH --error=logs/deepseek_%j.err      # STDERR
-#SBATCH --time=48:00:00                   # max runtime (HH:MM:SS)
-#SBATCH --nodes=1                         # 1 node
-#SBATCH --ntasks-per-node=1               # 1 task per node
-#SBATCH --cpus-per-task=4                 # adjust as needed
-#SBATCH --mem=16G                         # RAM
-#SBATCH --gres=gpu:1                        # uncomment if you need a GPU
-#SBATCH --partition=gpu_h100                # uncomment/use correct partition if GPU job
+#SBATCH --job-name=deepseek_smoke
+#SBATCH --chdir=$HOME/Thesis-LLM-CLD          # CD into project dir
+#SBATCH --output=logs/deepseek_%j.out         # combined stdout+stderr
+#SBATCH --error=logs/deepseek_%j.err          # or split if you prefer
+#SBATCH --time=48:00:00
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=16G
+#SBATCH --gres=gpu:1
+#SBATCH --partition=gpu_h100
 #SBATCH --mail-user=gijs.schouten@student.uva.nl
 #SBATCH --mail-type=ALL
-#SBATCH -o jobs/logs/deepseek_%j.log
+
+# — make sure logs dir exists —
+mkdir -p logs
+
+# — debugging on —
+set -euxo pipefail
 
 # — load your Python environment —
 module purge
 module load 2024
 module load Anaconda3/2024.06-1
 
-
-# — go to your project directory —
-cd $HOME/Thesis-LLM-CLD
+# — activate your conda env from within the project —
 conda activate ./thesis_env
 
+# — sanity check —
+which python
+python --version
+ls -la .
+ls -la ./thesis_env
+
 # — export your API key from the .env file —
+#    (ensure .env lives in $HOME/Thesis-LLM-CLD and is git-ignored)
 export $(grep -v '^#' .env | xargs)
 
-# — run the DeepSeek‐Reasoner script —
-./thesis_env/bin/python deepseek-r1-0528_reasoning.py
+# — finally, run the script —
+python deepseek-r1-0528_reasoning.py
+
