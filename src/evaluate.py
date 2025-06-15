@@ -25,17 +25,17 @@ from sklearn.metrics import (
 # hf_logging.set_verbosity_error()
 
 # ─── CONFIGURATION ───────────────────────────────────────────────────────────────
-# BASE_MODEL    = "mistralai/Mistral-7B-Instruct-v0.2"
+BASE_MODEL    = "mistralai/Mistral-7B-Instruct-v0.2"
 # BASE_MODEL      = "Qwen/Qwen2.5-14B-Instruct-1M"
 # BASE_MODEL      = "rombodawg/Rombos-LLM-V2.5-Qwen-32b"
 # FINETUNED_MODEL = "src/Mistral_LLM_7B_v0.1_Base_lora_finetuned/merged_fp16_7Bv0.1"  # Path to your fine-tuned model
-FINETUNED_MODEL = "src/Qwen2.5-14B-Instruct-1M_Qlora_finetuned_w_wrapping_and_reasoning_traces-09-06-2025/merged_fp16"
+FINETUNED_MODEL = "src/Mistral-7B-Instruct-v0.2_lora_finetuned_w_wrapping_and_reasoning_traces_and_mediators-15-06-2025/merged_fp16"
 # FINETUNED_MODEL = "src/Mistral-7B-Instruct-v0.2_lora_finetuned_w_wrapping_and_reasoning_traces-10-06-2025/merged_fp16"
-DATA_PATH       = "src/Dataset_Gijs_prompts.xlsx"
-OUTPUT_DIR      = "Evaluation_results_Qwen2.5-14B-Instruct-1M_lora_finetuned_w_wrapping_and_reasoning_traces-11-06-2025"
-# OUTPUT_DIR      = "Evaluation_results_Mistral-7B-Instruct-v0.2_lora_finetuned_w_wrapping_and_reasoning_traces-11-06-2025"
-SEQ_LEN         = 1300
-MAX_NEW_TOKENS  = 700
+DATA_PATH       = "src/Dataset_Gijs_prompts_with_reasoning_and_mediators_deepseekR1_distilled.xlsx"
+# OUTPUT_DIR      = "Evaluation_results_Qwen2.5-14B-Instruct-1M_lora_finetuned_w_wrapping_and_reasoning_traces-11-06-2025"
+OUTPUT_DIR      = "Evaluation_results_Mistral-7B-Instruct-v0.2_lora_finetuned_w_wrapping_and_reasoning_traces_and_mediators-15-06-2025"
+SEQ_LEN         = 1500
+MAX_NEW_TOKENS  = 1000
 DEVICE          = "cuda" if torch.cuda.is_available() else "cpu"
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -130,8 +130,7 @@ def main():
         tokenizer.pad_token = tokenizer.eos_token
 
     # run eval for both
-    # for label, model_name in [("base", BASE_MODEL), ("lora", FINETUNED_MODEL)]:
-    for label, model_name in [("lora", FINETUNED_MODEL)]:
+    for label, model_name in [("base", BASE_MODEL), ("lora", FINETUNED_MODEL)]:
 
         print(f"\n>> Evaluating {label} model")
         trues, preds, records = evaluate_model(
