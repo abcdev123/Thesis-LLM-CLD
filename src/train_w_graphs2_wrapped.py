@@ -18,14 +18,14 @@ from sklearn.metrics import accuracy_score
 # =====================================
 # Configuration
 # =====================================
-MODEL_ID   = "mistralai/Mistral-7B-Instruct-v0.2"
-# MODEL_ID   = "Qwen/Qwen2.5-14B-Instruct-1M"
+# MODEL_ID   = "mistralai/Mistral-7B-Instruct-v0.2"
+MODEL_ID   = "Qwen/Qwen2.5-14B-Instruct-1M"
 # MODEL_ID   = "rombodawg/Rombos-LLM-V2.5-Qwen-32b"
 # DATA_PATH  = "src/Dataset_Gijs_prompts.xlsx"
 DATA_PATH  = "src/Dataset_Gijs_prompts_with_reasoning_and_mediators_deepseekR1_distilled.xlsx"
 SEQ_LEN    = 1500     # ≤ 32768 for this model
-OUTPUT_DIR = "Mistral-7B-Instruct-v0.2_lora_finetuned_w_wrapping_and_reasoning_traces_and_mediators-15-06-2025"
-# OUTPUT_DIR = "Qwen2.5-14B-Instruct-1M_lora_finetuned_w_wrapping_second_run_for_comparison_with_first_run"
+# OUTPUT_DIR = "Mistral-7B-Instruct-v0.2_lora_finetuned_w_wrapping_and_reasoning_traces_and_mediators-15-06-2025"
+OUTPUT_DIR = "Qwen2.5-14B-Instruct-1M_lora_finetuned_w_wrapping_and_reasoning_traces_and_mediators-16-06-2025"
 
 torch.backends.cuda.matmul.allow_tf32 = True
 
