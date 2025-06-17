@@ -28,12 +28,14 @@ from sklearn.metrics import (
 # BASE_MODEL    = "mistralai/Mistral-7B-Instruct-v0.2"
 BASE_MODEL      = "Qwen/Qwen2.5-14B-Instruct-1M"
 # BASE_MODEL      = "rombodawg/Rombos-LLM-V2.5-Qwen-32b"
-FINETUNED_MODEL = "src/Qwen2.5-14B-Instruct-1M_lora_finetuned_w_wrapping_and_reasoning_traces_and_mediators-16-06-2025/merged_fp16"
 # FINETUNED_MODEL = "src/Mistral-7B-Instruct-v0.2_lora_finetuned_w_wrapping_and_reasoning_traces_and_mediators-15-06-2025/merged_fp16"
+# FINETUNED_MODEL = "src/Qwen2.5-14B-Instruct-1M_lora_finetuned_w_wrapping_and_reasoning_traces_and_mediators-16-06-2025/merged_fp16"
+FINETUNED_MODEL = "src/Rombos-32B-LLMV2.5-Qwen-32b_lora_finetuned_w_wrapping_and_reasoning_traces_and_mediators-17-06-2025/merged_fp16"
 # FINETUNED_MODEL = "src/Mistral-7B-Instruct-v0.2_lora_finetuned_w_wrapping_and_reasoning_traces-10-06-2025/merged_fp16"
 DATA_PATH       = "src/Dataset_Gijs_prompts_with_reasoning_and_mediators_deepseekR1_distilled.xlsx"
-OUTPUT_DIR      = "Evaluation_results_Qwen2.5-14B-Instruct-1M_lora_finetuned_w_wrapping_and_reasoning_traces_and_mediators-16-06-2025"
 # OUTPUT_DIR      = "Evaluation_results_Mistral-7B-Instruct-v0.2_lora_finetuned_w_wrapping_and_reasoning_traces_and_mediators-15-06-2025"
+# OUTPUT_DIR      = "Evaluation_results_Qwen2.5-14B-Instruct-1M_lora_finetuned_w_wrapping_and_reasoning_traces_and_mediators-16-06-2025"
+OUTPUT_DIR      = "Evaluation_results_Rombos-32B-LLMV2.5-Qwen-32b_lora_finetuned_w_wrapping_and_reasoning_traces_and_mediators-17-06-2025"
 SEQ_LEN         = 1500
 MAX_NEW_TOKENS  = 1000
 DEVICE          = "cuda" if torch.cuda.is_available() else "cpu"
