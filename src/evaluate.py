@@ -26,8 +26,8 @@ from sklearn.metrics import (
 
 # ─── CONFIGURATION ───────────────────────────────────────────────────────────────
 # BASE_MODEL    = "mistralai/Mistral-7B-Instruct-v0.2"
-BASE_MODEL      = "Qwen/Qwen2.5-14B-Instruct-1M"
-# BASE_MODEL      = "rombodawg/Rombos-LLM-V2.5-Qwen-32b"
+# BASE_MODEL      = "Qwen/Qwen2.5-14B-Instruct-1M"
+BASE_MODEL      = "rombodawg/Rombos-LLM-V2.5-Qwen-32b"
 # FINETUNED_MODEL = "src/Mistral-7B-Instruct-v0.2_lora_finetuned_w_wrapping_and_reasoning_traces_and_mediators-15-06-2025/merged_fp16"
 # FINETUNED_MODEL = "src/Qwen2.5-14B-Instruct-1M_lora_finetuned_w_wrapping_and_reasoning_traces_and_mediators-16-06-2025/merged_fp16"
 FINETUNED_MODEL = "src/Rombos-32B-LLMV2.5-Qwen-32b_lora_finetuned_w_wrapping_and_reasoning_traces_and_mediators-17-06-2025/merged_fp16"
@@ -133,7 +133,7 @@ def main():
 
     # run eval for both
     # for label, model_name in [("base", BASE_MODEL), ("lora", FINETUNED_MODEL)]:
-    for label, model_name in [("lora", FINETUNED_MODEL)]:
+    for label, model_name in [("base", BASE_MODEL)]:
 
         print(f"\n>> Evaluating {label} model")
         trues, preds, records = evaluate_model(
